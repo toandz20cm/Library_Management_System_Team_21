@@ -297,7 +297,7 @@ private JPasswordField createStyledPasswordField(String placeholder) {
     return field;
 }
 
-private RoundedButton createStyledButton(String text, Color baseColor) {
+  private RoundedButton createStyledButton(String text, Color baseColor) {
     RoundedButton button = new RoundedButton(text);
     button.setBackground(baseColor);
     button.setForeground(Color.WHITE);
@@ -313,6 +313,7 @@ private RoundedButton createStyledButton(String text, Color baseColor) {
     });
     return button;
     }
+
 
   private boolean isValidBirthDate(String birthDate) {
     try {

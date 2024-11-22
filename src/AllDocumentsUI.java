@@ -46,13 +46,13 @@ public class AllDocumentsUI extends JFrame {
     private void setupTableAppearance() {
         // Header styling
         JTableHeader header = documentsTable.getTableHeader();
-        header.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        header.setFont(new Font("Roboto", Font.BOLD, 16));
         header.setBackground(HEADER_COLOR);
         header.setForeground(Color.WHITE);
 
         // Table styling
         documentsTable.setRowHeight(30);
-        documentsTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        documentsTable.setFont(new Font("Roboto", Font.PLAIN, 14));
         documentsTable.setSelectionBackground(SELECTION_COLOR);
         documentsTable.setSelectionForeground(Color.BLACK);
 

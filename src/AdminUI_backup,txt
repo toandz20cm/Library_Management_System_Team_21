@@ -68,7 +68,7 @@ public class AdminUI extends JFrame {
         headerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 35));
 
         JLabel titleLabel = new JLabel("LIBRARY MANAGEMENT SYSTEM");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 32));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
         
@@ -123,88 +123,23 @@ public class AdminUI extends JFrame {
     }
 
     private JButton createModernButton(String text) {
-        JButton button = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    
-                // Gradient background
-                GradientPaint gradient;
-                if (getModel().isPressed()) {
-                    gradient = new GradientPaint(0, 0, new Color(41, 128, 185, 200),
-                                              0, getHeight(), new Color(52, 152, 219, 200));
-                } else if (getModel().isRollover()) {
-                    gradient = new GradientPaint(0, 0, new Color(52, 152, 219),
-                                              0, getHeight(), new Color(41, 128, 185));
-                } else {
-                    gradient = new GradientPaint(0, 0, new Color(41, 128, 185),
-                                              0, getHeight(), new Color(52, 152, 219));
-                }
-                
-                g2d.setPaint(gradient);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-    
-                // Add subtle inner shadow
-                if (!getModel().isPressed()) {
-                    g2d.setColor(new Color(255, 255, 255, 50));
-                    g2d.fillRoundRect(0, 0, getWidth(), getHeight()/2, 15, 15);
-                }
-    
-                // Text
-                FontMetrics metrics = g2d.getFontMetrics(getFont());
-                Rectangle stringBounds = metrics.getStringBounds(getText(), g2d).getBounds();
-                
-                int textX = (getWidth() - stringBounds.width) / 2;
-                int textY = (getHeight() - stringBounds.height) / 2 + metrics.getAscent();
-    
-                // Draw text shadow
-                g2d.setColor(new Color(0, 0, 0, 50));
-                g2d.drawString(getText(), textX + 1, textY + 1);
-    
-                // Draw text
-                g2d.setColor(Color.WHITE);
-                g2d.drawString(getText(), textX, textY);
-            }
-        };
-    
-        // Basic button setup
-        button.setFont(new Font("Roboto", Font.BOLD, 16));
-        button.setForeground(Color.WHITE);
-        button.setPreferredSize(new Dimension(200, 60));
+        JButton button = new JButton("<html><center>" + "<br>" + text + "</center></html>");
+        button.setFont(new Font("Roboto", Font.PLAIN, 14));
+        button.setForeground(new Color(44, 62, 80));
+        button.setBackground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    
-        // Add padding
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-    
-        // Custom tooltip
-        button.setToolTipText(text);
-        
-        // Add hover effect with timer
-        Timer timer = new Timer(50, null);
+
+        // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                timer.addActionListener(e -> {
-                    button.repaint();
-                    if (!button.getModel().isRollover()) {
-                        timer.stop();
-                    }
-                });
-                timer.start();
+                button.setBackground(new Color(236, 240, 241));
             }
-    
-            @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                timer.stop();
-                button.repaint();
+                button.setBackground(Color.WHITE);
             }
         });
-    
+
         return button;
     }
 
@@ -341,11 +276,11 @@ private void addInputField(JPanel panel, String label, JTextField field) {
     
     // Style cho label
     JLabel labelComponent = new JLabel(label);
-    labelComponent.setFont(new Font("Roboto", Font.PLAIN, 13));
+    labelComponent.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 13));
     labelComponent.setForeground(new Color(100, 100, 100));
     
     // Style cho text field
-    field.setFont(new Font("Roboto", Font.PLAIN, 14));
+    field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
     field.setPreferredSize(new Dimension(250, 35));
     field.setBackground(new Color(247, 248, 250));
     field.setForeground(new Color(50, 50, 50));
@@ -395,7 +330,7 @@ private JPanel createModernInputPanel() {
     
     // Thêm tiêu đề cho panel
     JLabel titleLabel = new JLabel("Enter Information");
-    titleLabel.setFont(new Font("Roboto", Font.BOLD, 18));
+    titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
     titleLabel.setForeground(new Color(50, 50, 50));
     titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
@@ -408,8 +343,8 @@ private JPanel createModernInputPanel() {
 private int showModernDialog(JPanel panel, String title) {
     UIManager.put("OptionPane.background", Color.WHITE);
     UIManager.put("Panel.background", Color.WHITE);
-    UIManager.put("OptionPane.buttonFont", new Font("Roboto", Font.PLAIN, 13));
-    UIManager.put("OptionPane.messageFont", new Font("Roboto", Font.PLAIN, 13));
+    UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.PLAIN, 13));
+    UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.PLAIN, 13));
     
     JOptionPane optionPane = new JOptionPane(
         panel,
@@ -458,7 +393,7 @@ private int showModernDialog(JPanel panel, String title) {
         resultPanel.setBackground(Color.WHITE);
 
         JTextArea resultArea = new JTextArea();
-        resultArea.setFont(new Font("Roboto", Font.PLAIN, 14));
+        resultArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         resultArea.setEditable(false);
         resultArea.setLineWrap(true);
         resultArea.setWrapStyleWord(true);
