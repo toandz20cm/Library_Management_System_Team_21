@@ -1,2 +1,2 @@
 # Library_Management_System_Team_21
-Member: Cao Song Toàn, Nghiêm Đình Dương, Việt Anh
+Member: Cao Song Toàn, Nghiêm Đình Dương, Trần Đức Việt Anh
