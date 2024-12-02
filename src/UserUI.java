@@ -119,24 +119,118 @@ public class UserUI extends JFrame {
     }
 
     private JPanel createActionButtonPanel() {
-        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
-        panel.setBackground(BACKGROUND_COLOR);
-
+        // Main panel với padding và border
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBackground(BACKGROUND_COLOR);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+    
+        // Panel tiêu đề
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        titlePanel.setBackground(BACKGROUND_COLOR);
+        JLabel actionTitle = new JLabel("Thao Tác");
+        actionTitle.setFont(TITLE_FONT);
+        actionTitle.setForeground(PRIMARY_COLOR);
+        titlePanel.add(actionTitle);
+        mainPanel.add(titlePanel);
+        mainPanel.add(Box.createVerticalStrut(10));
+    
+        // Tạo panel cho các button
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
+    
         String[] buttonTexts = {
-            "Chỉnh Sửa Thông Tin", 
-            "Mượn Tài Liệu", 
-            "Trả Tài Liệu", 
-            "Xem Tài Liệu", 
+            "Chỉnh Sửa Thông Tin",
+            "Mượn Tài Liệu",
+            "Trả Tài Liệu",
+            "Xem Tài Liệu",
             "Đăng Xuất"
+        };
+    
+        String[] buttonIcons = {
+            "👤", "📚", "↩️", "🔍", "🚪"
         };
 
         actionButtons = new JButton[buttonTexts.length];
+    
         for (int i = 0; i < buttonTexts.length; i++) {
-            actionButtons[i] = createStyledButton(buttonTexts[i]);
-            panel.add(actionButtons[i]);
+            // Container cho mỗi button để thêm margin
+            JPanel buttonContainer = new JPanel();
+            buttonContainer.setLayout(new BoxLayout(buttonContainer, BoxLayout.X_AXIS));
+            buttonContainer.setBackground(BACKGROUND_COLOR);
+            
+            // Tạo button với icon và text
+            JButton button = new JButton();
+            button.setLayout(new BoxLayout(button, BoxLayout.X_AXIS));
+            
+            // Icon panel
+            JLabel iconLabel = new JLabel(buttonIcons[i]);
+            iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+            iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+            
+            // Text panel
+            JLabel textLabel = new JLabel(buttonTexts[i]);
+            textLabel.setFont(NORMAL_FONT);
+            
+            button.add(iconLabel);
+            button.add(textLabel);
+            button.add(Box.createHorizontalGlue());
+            
+            // Styling cho button
+            button.setAlignmentX(Component.CENTER_ALIGNMENT);
+            button.setMaximumSize(new Dimension(250, 45));
+            button.setPreferredSize(new Dimension(250, 45));
+            button.setBackground(PRIMARY_COLOR);
+            button.setForeground(Color.WHITE);
+            button.setFocusPainted(false);
+            button.setBorderPainted(false);
+            button.setOpaque(true);
+            
+            // Hiệu ứng hover
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    button.setBackground(SECONDARY_COLOR);
+                    // Thêm hiệu ứng shadow khi hover
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(0, 0, 0, 30), 1),
+                        BorderFactory.createEmptyBorder(5, 15, 5, 15)));
+                }
+    
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    button.setBackground(PRIMARY_COLOR);
+                    button.setBorder(BorderFactory.createEmptyBorder(6, 16, 6, 16));
+                }
+    
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    button.setBackground(new Color(45, 87, 134));
+                }
+    
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    button.setBackground(SECONDARY_COLOR);
+                }
+            });
+    
+            actionButtons[i] = button;
+            buttonContainer.add(button);
+            buttonContainer.add(Box.createVerticalStrut(10));
+            buttonPanel.add(buttonContainer);
+            buttonPanel.add(Box.createVerticalStrut(10));
         }
-
-        return panel;
+    
+        // Thêm panel button vào main panel
+        mainPanel.add(buttonPanel);
+        
+        // Panel wrapper để căn chỉnh tổng thể
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        wrapperPanel.setBackground(BACKGROUND_COLOR);
+        wrapperPanel.add(mainPanel, BorderLayout.NORTH);
+        
+        return wrapperPanel;
     }
 
     private JLabel createInfoLabel(String text) {
@@ -146,30 +240,6 @@ public class UserUI extends JFrame {
         return label;
     }
 
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(NORMAL_FONT);
-        button.setBackground(PRIMARY_COLOR);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setOpaque(true);
-
-        // Hiệu ứng hover
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(SECONDARY_COLOR);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(PRIMARY_COLOR);
-            }
-        });
-
-        return button;
-    }
     private void setupEventListeners() {
       // Chỉnh sửa thông tin người dùng
       actionButtons[0].addActionListener(e -> {
@@ -311,7 +381,7 @@ public class UserUI extends JFrame {
           new LoginUI(library).setVisible(true);
           dispose();
       });
-  }
+    }
 
     private void populateBorrowedDocumentsTable() {
       DefaultTableModel tableModel = (DefaultTableModel) borrowedDocumentsTable.getModel();

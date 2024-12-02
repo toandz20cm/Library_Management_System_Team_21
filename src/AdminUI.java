@@ -3,14 +3,23 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.MatteBorder;
-
+import javax.swing.Timer;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import javax.swing.plaf.basic.BasicScrollBarUI;
+import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import org.json.*;
+
 
 public class AdminUI extends JFrame {
     private JButton addDocumentButton;
@@ -299,20 +308,44 @@ public class AdminUI extends JFrame {
         });
 
         // Search Document Action
-        searchDocumentButton.addActionListener(e -> {
-            JPanel panel = createModernInputPanel();
-            JTextField searchField = new JTextField(20);
-            addInputField(panel, "Search Keyword:", searchField);
+// Search Document Action
+searchDocumentButton.addActionListener(e -> {
+    // Panel chính để chọn kiểu tìm kiếm
+    JPanel panel = createModernInputPanel();
+    JTextField searchField = new JTextField(20);
+    addInputField(panel, "Search Keyword:", searchField);
 
-            int result = showModernDialog(panel, "Search Documents");
+    // Tùy chọn kiểu tìm kiếm
+    JRadioButton localSearchButton = new JRadioButton("Search in Library");
+    JRadioButton apiSearchButton = new JRadioButton("Search Online");
+    ButtonGroup searchTypeGroup = new ButtonGroup();
+    searchTypeGroup.add(localSearchButton);
+    searchTypeGroup.add(apiSearchButton);
+    localSearchButton.setSelected(true); // Mặc định chọn tìm kiếm nội bộ
 
-            if (result == JOptionPane.OK_OPTION) {
-                String keyword = searchField.getText();
-                List<Document> documents = library.searchDocuments(keyword);
-                showSearchResults(documents);
-            }
-        });
+    // Thêm radio buttons vào giao diện
+    JPanel searchTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    searchTypePanel.setBackground(Color.WHITE);
+    searchTypePanel.add(localSearchButton);
+    searchTypePanel.add(apiSearchButton);
+    searchTypePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 15, 0));
+    panel.add(searchTypePanel);
 
+    // Hiển thị dialog chọn kiểu tìm kiếm
+    int result = showModernDialog(panel, "Search Documents");
+
+    if (result == JOptionPane.OK_OPTION) {
+        String keyword = searchField.getText();
+        if (localSearchButton.isSelected()) {
+            // Tìm kiếm trong thư viện nội bộ
+            List<Document> documents = library.searchDocuments(keyword);
+            showSearchResults(documents);
+        } else if (apiSearchButton.isSelected()) {
+            // Tìm kiếm trên mạng qua API
+            new SearchOnlineTask(keyword).execute();
+        }
+    }
+});
         // Other existing action listeners
         viewAllDocumentsButton.addActionListener(e -> new AllDocumentsUI(library).setVisible(true));
         addDocumentByISBNButton.addActionListener(e -> {
@@ -554,6 +587,64 @@ private int showModernDialog(JPanel panel, String title) {
             g2.drawString(text, textX + 2, textY + 2);
             
             g2.dispose();
+        }
+    }
+    private class SearchOnlineTask extends SwingWorker<List<Document>, Void> {
+        private final String keyword;
+    
+        public SearchOnlineTask(String keyword) {
+            this.keyword = keyword;
+        }
+    
+        @Override
+        protected List<Document> doInBackground() throws Exception {
+            List<Document> onlineResults = new ArrayList<>();
+            String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + URLEncoder.encode(keyword, "UTF-8");
+            HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
+            reader.close();
+    
+            JSONObject json = new JSONObject(jsonBuilder.toString());
+            JSONArray items = json.optJSONArray("items");
+            if (items != null) {
+                for (int i = 0; i < items.length(); i++) {
+                    JSONObject volumeInfo = items.getJSONObject(i).getJSONObject("volumeInfo");
+                    String title = volumeInfo.optString("title", "Unknown Title");
+                    String author = volumeInfo.optJSONArray("authors") != null ?
+                            volumeInfo.getJSONArray("authors").getString(0) : "Unknown Author";
+                    String isbn = volumeInfo.optJSONArray("industryIdentifiers") != null ?
+                            volumeInfo.getJSONArray("industryIdentifiers").getJSONObject(0).getString("identifier") : "Unknown ISBN";
+                    int publicationYear = volumeInfo.optString("publishedDate", "0").isEmpty() ?
+                            0 : Integer.parseInt(volumeInfo.optString("publishedDate").substring(0, 4));
+                    String genre = volumeInfo.optJSONArray("categories") != null ?
+                            volumeInfo.getJSONArray("categories").getString(0) : "Unknown Genre";
+    
+                    Document doc = new Document(0, title, author, 0, isbn, publicationYear, genre);
+                    onlineResults.add(doc);
+                }
+            }
+            return onlineResults;
+        }
+    
+        @Override
+        protected void done() {
+            try {
+                List<Document> documents = get();
+                if (documents.isEmpty()) {
+                    showErrorMessage("No online documents found!");
+                } else {
+                    showSearchResults(documents);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                showErrorMessage("Error occurred while fetching online documents!");
+            }
         }
     }
 }

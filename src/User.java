@@ -1,11 +1,6 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Represents a user in the library system.
- * Stores user details and manages borrowed documents.
- */
 public class User implements Serializable {
     private String username;
     private String password;
