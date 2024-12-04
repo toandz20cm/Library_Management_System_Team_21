@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 import java.io.BufferedReader;
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 
@@ -20,15 +19,15 @@ public class Document implements Serializable {
 
   public Document(int id, String title, String author, int quantity, String isbn
       , int publicationYear, String genre) {
-          this.id = id;
-          this.title = title;
-          this.author = author;
-          this.quantity = quantity;
-          this.isbn = isbn;
-          this.publicationYear = publicationYear;
-          this.genre = genre;
-          this.ratings = new ArrayList<>();
-          this.reviews = new ArrayList<>();
+    this.id = id;
+    this.title = title;
+    this.author = author;
+    this.quantity = quantity;
+    this.isbn = isbn;
+    this.publicationYear = publicationYear;
+    this.genre = genre;
+    this.ratings = new ArrayList<>();
+    this.reviews = new ArrayList<>();
   }
 
   public int getId() { return id; }

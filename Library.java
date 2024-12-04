@@ -65,11 +65,15 @@ public class Library {
     }
   }
 
-  public void editDocument(int id, String author, int quantity) {
+  public void editDocument(int id, String title, String author, int quantity, String isbn, int publicationYear, String genre) {
     for (Document doc : documents) {
       if (doc.getId() == id) {
-        doc.setAuthor(author);
-        doc.setQuantity(quantity);
+        doc.setTitle(title); // Cập nhật Title
+        doc.setAuthor(author); // Cập nhật Author
+        doc.setQuantity(quantity); // Cập nhật Quantity
+        doc.setIsbn(isbn); // Cập nhật ISBN
+        doc.setPublicationYear(publicationYear); // Cập nhật Publication Year
+        doc.setGenre(genre); // Cập nhật Genre
         break;
       }
     }
@@ -121,6 +125,16 @@ public class Library {
       }
     }
     return null; // Trả về null nếu không tìm thấy tài liệu với ID tương ứng
+  }
+
+  // Tìm tài liệu theo ISBN
+  public Document getDocumentByIsbn(String isbn) {
+    for (Document doc : documents) {
+      if (doc.getIsbn().equalsIgnoreCase(isbn)) {
+        return doc;
+      }
+    }
+    return null; // Không tìm thấy
   }
 
   // Phương thức tạo ID mới

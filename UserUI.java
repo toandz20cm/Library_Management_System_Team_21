@@ -1,344 +1,663 @@
-import java.awt.Font;
 import java.awt.*;
-import java.awt.Color;
-import java.util.List;
+import java.awt.event.*;
+import java.util.ArrayList;
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.PrintWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.border.MatteBorder;
+import javax.swing.table.*;
+import java.io.*;
+import java.util.List;
 
 public class UserUI extends JFrame {
-  private JLabel displayNameLabel;
-  private JLabel phoneNumberLabel;
-  private JLabel birthDateLabel;
-  private JTable borrowedDocumentsTable;
-  private JButton editUserInfoButton;
-  private JButton borrowDocumentButton;
-  private JButton returnDocumentButton;
-  private JButton logoutButton;
-  private JButton viewAllDocumentsButton;
-  private JButton changePasswordButton;
+    // Màu sắc chung
+    private static final Color BACKGROUND_COLOR = new Color(245, 250, 255);
+    private static final Color PRIMARY_COLOR = new Color(60, 116, 179);
+    private static final Color SECONDARY_COLOR = new Color(100, 149, 237);
 
-  private User user;
-  private Library library;
+    // Phông chữ
+    private static final Font TITLE_FONT = new Font("Roboto", Font.BOLD, 18);
+    private static final Font NORMAL_FONT = new Font("Segoe UI", Font.PLAIN, 14);
 
-  public UserUI(Library library, User user) {
-    this.library = library;
-    this.user = user;
+    // Các thành phần giao diện
+    private JLabel displayNameLabel;
+    private JLabel phoneNumberLabel;
+    private JLabel birthDateLabel;
+    private JTable borrowedDocumentsTable;
+    private JButton[] actionButtons;
 
-    setTitle("Library Management System - " + user.getDisplayName());
-    setSize(800, 600);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setLocationRelativeTo(null);
+    private User user;
+    private Library library;
 
-    // Cấu hình màu nền chính
-    getContentPane().setBackground(new Color(240, 248, 255));
+    public UserUI(Library library, User user) {
+        this.library = library;
+        this.user = user;
 
-    // Phông chữ chung
-    Font font = new Font("Segoe UI", Font.PLAIN, 14);
+        // Cấu hình cửa sổ
+        configureWindow();
 
-    displayNameLabel = new JLabel("Tên hiển thị: " + user.getDisplayName());
-    displayNameLabel.setFont(font);
+        // Tạo giao diện
+        createUI();
 
-    phoneNumberLabel = new JLabel("Số điện thoại: " + user.getPhoneNumber());
-    phoneNumberLabel.setFont(font);
+        // Thiết lập sự kiện
+        setupEventListeners();
+    }
 
-    birthDateLabel = new JLabel("Ngày sinh: " + user.getBirthDate());
-    birthDateLabel.setFont(font);
+    private void configureWindow() {
+        setTitle("Hệ Thống Quản Lý Thư Viện - " + user.getDisplayName());
+        setSize(900, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        getContentPane().setBackground(BACKGROUND_COLOR);
+    }
 
-    // Tạo bảng tài liệu đã mượn
-    borrowedDocumentsTable = new JTable(new DefaultTableModel(new Object[]{"Tên tài liệu", "Tác giả", "Thể loại"}, 0));
-    borrowedDocumentsTable.setFont(font);
-    borrowedDocumentsTable.setRowHeight(25);
-    borrowedDocumentsTable.setBackground(new Color(255, 255, 255));
-    borrowedDocumentsTable.setGridColor(new Color(220, 220, 220));
-    JScrollPane tableScrollPane = new JScrollPane(borrowedDocumentsTable);
-    tableScrollPane.setBorder(BorderFactory.createTitledBorder("Danh sách tài liệu đã mượn"));
+    private void createUI() {
+        // Layout tổng thể
+        setLayout(new BorderLayout(15, 15));
 
-    editUserInfoButton = createStyledButton("Chỉnh sửa thông tin");
-    borrowDocumentButton = createStyledButton("Mượn tài liệu");
-    returnDocumentButton = createStyledButton("Trả tài liệu");
-    changePasswordButton = createStyledButton("Đổi mật khẩu");
-    viewAllDocumentsButton = createStyledButton("Xem tất cả tài liệu");
-    logoutButton = createStyledButton("Đăng xuất");
+        // Panel thông tin người dùng
+        JPanel userInfoPanel = createUserInfoPanel();
+        add(userInfoPanel, BorderLayout.NORTH);
 
-    setLayout(new BorderLayout());
-    JPanel userInfoPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-    userInfoPanel.setBackground(new Color(240, 248, 255));
-    userInfoPanel.add(displayNameLabel);
-    userInfoPanel.add(new JLabel());
-    userInfoPanel.add(phoneNumberLabel);
-    userInfoPanel.add(new JLabel());
-    userInfoPanel.add(birthDateLabel);
-    userInfoPanel.add(new JLabel());
+        // Bảng tài liệu đã mượn
+        JScrollPane tableScrollPane = createBorrowedDocumentsTable();
+        add(tableScrollPane, BorderLayout.CENTER);
 
-    JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 10));
-    buttonPanel.setBackground(new Color(240, 248, 255));
-    buttonPanel.add(editUserInfoButton);
-    buttonPanel.add(borrowDocumentButton);
-    buttonPanel.add(returnDocumentButton);
-    buttonPanel.add(changePasswordButton);
-    buttonPanel.add(viewAllDocumentsButton);
-    buttonPanel.add(logoutButton);
+        // Panel nút chức năng
+        JPanel actionButtonPanel = createActionButtonPanel();
+        add(actionButtonPanel, BorderLayout.EAST);
+    }
 
-    add(userInfoPanel, BorderLayout.NORTH);
-    add(new JScrollPane(borrowedDocumentsTable), BorderLayout.CENTER);
-    add(buttonPanel, BorderLayout.EAST);
+    private JPanel createUserInfoPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 10, 5, 10);
+        gbc.anchor = GridBagConstraints.WEST;
 
-    editUserInfoButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        String newDisplayName = JOptionPane.showInputDialog("Nhập tên hiển thị mới:", user.getDisplayName());
-        if (newDisplayName == null) return;  // Hủy nếu nhấn Cancel
+        // Tiêu đề thông tin người dùng
+        JLabel titleLabel = new JLabel("Thông Tin Cá Nhân");
+        titleLabel.setFont(TITLE_FONT);
+        titleLabel.setForeground(PRIMARY_COLOR);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(titleLabel, gbc);
 
-        String newPhoneNumber = JOptionPane.showInputDialog("Nhập số điện thoại mới:", user.getPhoneNumber());
-        if (newPhoneNumber == null) return;
+        // Các nhãn thông tin
+        gbc.gridwidth = 1;
+        gbc.gridy = 1;
+        displayNameLabel = createInfoLabel("Tên hiển thị: " + user.getDisplayName());
+        panel.add(displayNameLabel, gbc);
 
-        String newBirthDate = JOptionPane.showInputDialog("Nhập ngày sinh mới (dd/MM/yyyy):", user.getBirthDate());
-        if (newBirthDate == null) return;
+        gbc.gridy = 2;
+        phoneNumberLabel = createInfoLabel("Số điện thoại: " + user.getPhoneNumber());
+        panel.add(phoneNumberLabel, gbc);
 
-        // Cập nhật thông tin người dùng
-        user.setDisplayName(newDisplayName);
-        user.setPhoneNumber(newPhoneNumber);
-        user.setBirthDate(newBirthDate);
+        gbc.gridy = 3;
+        birthDateLabel = createInfoLabel("Ngày sinh: " + user.getBirthDate());
+        panel.add(birthDateLabel, gbc);
 
-        // Cập nhật giao diện hiển thị
-        displayNameLabel.setText("Tên hiển thị: " + user.getDisplayName());
-        phoneNumberLabel.setText("Số điện thoại: " + user.getPhoneNumber());
-        birthDateLabel.setText("Ngày sinh: " + user.getBirthDate());
+        return panel;
+    }
 
-        JOptionPane.showMessageDialog(UserUI.this, "Cập nhật thông tin thành công!");
-      }
-    });
+    private JScrollPane createBorrowedDocumentsTable() {
+        String[] columnNames = {"Tên Tài Liệu", "Tác Giả", "Thể Loại"};
+        borrowedDocumentsTable = new JTable(new DefaultTableModel(columnNames, 0)) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
+        // Cấu hình bảng
+        borrowedDocumentsTable.setFont(NORMAL_FONT);
+        borrowedDocumentsTable.setRowHeight(30);
+        borrowedDocumentsTable.getTableHeader().setFont(NORMAL_FONT);
+        borrowedDocumentsTable.setSelectionBackground(SECONDARY_COLOR);
+        borrowedDocumentsTable.setSelectionForeground(Color.WHITE);
 
+        populateBorrowedDocumentsTable();
 
-    borrowDocumentButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        // Hiển thị hộp thoại để người dùng nhập từ khóa tìm kiếm
-        String keyword = JOptionPane.showInputDialog(
-            UserUI.this,
-            "Nhập ID, ISBN hoặc tên tài liệu muốn mượn:",
-            "Tìm tài liệu",
-            JOptionPane.PLAIN_MESSAGE
+        JScrollPane scrollPane = new JScrollPane(borrowedDocumentsTable);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Danh Sách Tài Liệu Đã Mượn"));
+        return scrollPane;
+
+    }
+
+    private JPanel createActionButtonPanel() {
+        // Main panel với padding và border
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBackground(BACKGROUND_COLOR);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        // Panel tiêu đề
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        titlePanel.setBackground(BACKGROUND_COLOR);
+        JLabel actionTitle = new JLabel("Thao Tác");
+        actionTitle.setFont(TITLE_FONT);
+        actionTitle.setForeground(PRIMARY_COLOR);
+        titlePanel.add(actionTitle);
+        mainPanel.add(titlePanel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        // Tạo panel cho các button
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
+
+        String[] buttonTexts = {
+            "Chỉnh Sửa Thông Tin",
+            "Mượn Tài Liệu",
+            "Trả Tài Liệu",
+            "Xem Tài Liệu",
+            "Đăng Xuất",
+            "Đổi Mật Khẩu"
+        };
+
+        String[] buttonIcons = {
+            "👤    ", "📚      ", "↩️", "🔍     ", "🚪     ","      ",
+        };
+
+        actionButtons = new JButton[buttonTexts.length];
+
+        for (int i = 0; i < buttonTexts.length; i++) {
+            // Container cho mỗi button để thêm margin
+            JPanel buttonContainer = new JPanel();
+            buttonContainer.setLayout(new BoxLayout(buttonContainer, BoxLayout.X_AXIS));
+            buttonContainer.setBackground(BACKGROUND_COLOR);
+
+            // Tạo button với icon và text
+            JButton button = new JButton();
+            button.setLayout(new BoxLayout(button, BoxLayout.X_AXIS));
+
+            // Icon panel
+            JLabel iconLabel = new JLabel(buttonIcons[i]);
+            iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+            iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+            // Text panel
+            JLabel textLabel = new JLabel(buttonTexts[i]);
+            textLabel.setFont(NORMAL_FONT);
+
+            button.add(iconLabel);
+            button.add(textLabel);
+            button.add(Box.createHorizontalGlue());
+
+            // Styling cho button
+            button.setAlignmentX(Component.CENTER_ALIGNMENT);
+            button.setMaximumSize(new Dimension(250, 45));
+            button.setPreferredSize(new Dimension(250, 45));
+            button.setBackground(PRIMARY_COLOR);
+            button.setForeground(Color.WHITE);
+            button.setFocusPainted(false);
+            button.setBorderPainted(false);
+            button.setOpaque(true);
+
+            // Hiệu ứng hover
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    button.setBackground(SECONDARY_COLOR);
+                    // Thêm hiệu ứng shadow khi hover
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(0, 0, 0, 30), 1),
+                        BorderFactory.createEmptyBorder(5, 15, 5, 15)));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    button.setBackground(PRIMARY_COLOR);
+                    button.setBorder(BorderFactory.createEmptyBorder(6, 16, 6, 16));
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    button.setBackground(new Color(45, 87, 134));
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    button.setBackground(SECONDARY_COLOR);
+                }
+            });
+
+            actionButtons[i] = button;
+            buttonContainer.add(button);
+            buttonContainer.add(Box.createVerticalStrut(10));
+            buttonPanel.add(buttonContainer);
+            buttonPanel.add(Box.createVerticalStrut(10));
+        }
+
+        // Thêm panel button vào main panel
+        mainPanel.add(buttonPanel);
+
+        // Panel wrapper để căn chỉnh tổng thể
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        wrapperPanel.setBackground(BACKGROUND_COLOR);
+        wrapperPanel.add(mainPanel, BorderLayout.NORTH);
+
+        return wrapperPanel;
+    }
+
+    private JLabel createInfoLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(NORMAL_FONT);
+        label.setForeground(Color.DARK_GRAY);
+        return label;
+    }
+
+    private void setupEventListeners() {
+        // Chỉnh sửa thông tin người dùng
+        actionButtons[0].addActionListener(e -> {
+            JPanel panel = createModernInputPanel();
+            JTextField displayNameField = new JTextField(user.getDisplayName(), 20);
+            JTextField phoneNumberField = new JTextField(user.getPhoneNumber(), 20);
+            JTextField birthDateField = new JTextField(user.getBirthDate(), 20);
+
+            addInputField(panel, "Tên hiển thị:", displayNameField);
+            addInputField(panel, "Số điện thoại:", phoneNumberField);
+            addInputField(panel, "Ngày sinh:", birthDateField);
+
+            int result = showModernDialog(panel, "Chỉnh sửa thông tin");
+
+            if (result == JOptionPane.OK_OPTION) {
+                String newDisplayName = displayNameField.getText();
+                String newPhoneNumber = phoneNumberField.getText();
+                String newBirthDate = birthDateField.getText();
+
+                if (newDisplayName.trim().isEmpty() || newPhoneNumber.trim().isEmpty() || newBirthDate.trim().isEmpty()) {
+                    showErrorMessage("Vui lòng điền đầy đủ thông tin!");
+                    return;
+                }
+
+                user.setDisplayName(newDisplayName);
+                user.setPhoneNumber(newPhoneNumber);
+                user.setBirthDate(newBirthDate);
+                updateUserInfoInFile(user);
+
+                displayNameLabel.setText("Tên hiển thị: " + user.getDisplayName());
+                phoneNumberLabel.setText("Số điện thoại: " + user.getPhoneNumber());
+                birthDateLabel.setText("Ngày sinh: " + user.getBirthDate());
+
+                showSuccessMessage("Cập nhật thông tin thành công!");
+            }
+        });
+
+        // Mượn tài liệu
+        actionButtons[1].addActionListener(e -> {
+            // Hiển thị hộp thoại để người dùng nhập từ khóa tìm kiếm
+            String keyword = JOptionPane.showInputDialog(
+                UserUI.this,
+                "Nhập ID, ISBN hoặc tên tài liệu muốn mượn:",
+                "Tìm tài liệu",
+                JOptionPane.PLAIN_MESSAGE
+            );
+
+            if (keyword == null || keyword.trim().isEmpty()) return; // Hủy nếu nhấn Cancel hoặc không nhập gì
+
+            // Tìm kiếm tài liệu theo ID, ISBN hoặc Tên
+            Document foundDocument = null;
+            try {
+                int id = Integer.parseInt(keyword); // Kiểm tra nếu người dùng nhập ID
+                foundDocument = library.getDocumentById(id); // Tìm tài liệu theo ID
+            } catch (NumberFormatException ex) {
+                // Nếu không phải ID, kiểm tra tiếp theo ISBN
+                foundDocument = library.getDocumentByIsbn(keyword);
+                if (foundDocument == null) {
+                    // Nếu không phải ISBN, tìm theo tên
+                    foundDocument = library.searchDocument(keyword);
+                }
+            }
+
+            // Xử lý nếu tìm thấy tài liệu
+            if (foundDocument != null) {
+                if (foundDocument.getQuantity() > 0) {
+                    // Cập nhật danh sách tài liệu đã mượn
+                    user.getBorrowedDocuments().add(foundDocument);
+                    foundDocument.setQuantity(foundDocument.getQuantity() - 1);
+
+                    // Lưu danh sách tài liệu vào file
+                    saveLibraryToFile(); // <== Lưu lại sau khi cập nhật số lượng
+
+                    // Lưu lại thông tin vào file và cập nhật giao diện
+                    saveBorrowedDocumentsToFile();
+                    populateBorrowedDocumentsTable();
+
+                    JOptionPane.showMessageDialog(
+                        UserUI.this,
+                        "Mượn tài liệu thành công!",
+                        "Thành công",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                        UserUI.this,
+                        "Tài liệu không có sẵn!",
+                        "Thông báo",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                    UserUI.this,
+                    "Không tìm thấy tài liệu với từ khóa: " + keyword,
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+
+        // Trả tài liệu
+        actionButtons[2].addActionListener(e -> {
+            if (user.getBorrowedDocuments().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Bạn chưa mượn tài liệu nào để trả.",
+                    "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+                return;
+            }
+
+            String[] borrowedTitles = user.getBorrowedDocuments().stream()
+                .map(Document::getTitle)
+                .toArray(String[]::new);
+
+            String returnedTitle = (String) JOptionPane.showInputDialog(
+                this,
+                "Chọn tài liệu để trả:",
+                "Trả tài liệu",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                borrowedTitles,
+                borrowedTitles[0]
+            );
+
+            if (returnedTitle != null) {
+                Document returnedDocument = user.getBorrowedDocuments().stream()
+                    .filter(doc -> doc.getTitle().equals(returnedTitle))
+                    .findFirst()
+                    .orElse(null);
+
+                if (returnedDocument != null) {
+                    returnedDocument.setQuantity(returnedDocument.getQuantity() + 1);
+
+                    // Lưu danh sách tài liệu vào file
+                    saveLibraryToFile(); // <== Lưu lại sau khi cập nhật số lượng
+
+                    user.getBorrowedDocuments().remove(returnedDocument);
+
+                    saveBorrowedDocumentsToFile();
+                    populateBorrowedDocumentsTable();
+
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Trả tài liệu thành công!",
+                        "Thông báo",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+            }
+        });
+
+        // Xem tài liệu
+        actionButtons[3].addActionListener(e ->
+            new AllDocumentsUI(library).setVisible(true)
         );
 
-        if (keyword == null || keyword.trim().isEmpty()) return; // Hủy nếu nhấn Cancel hoặc không nhập gì
+        // Đăng xuất
+        actionButtons[4].addActionListener(e -> {
+            new LoginUI(library).setVisible(true);
+            dispose();
+        });
 
-        // Tìm kiếm tài liệu theo ID, ISBN hoặc Tên
-        Document foundDocument = null;
-        try {
-          int id = Integer.parseInt(keyword); // Kiểm tra nếu người dùng nhập ID
-          foundDocument = library.getDocumentById(id); // Tìm tài liệu theo ID
-        } catch (NumberFormatException ex) {
-          // Nếu không phải ID, kiểm tra tiếp theo ISBN
-          foundDocument = library.getDocumentByIsbn(keyword);
-          if (foundDocument == null) {
-            // Nếu không phải ISBN, tìm theo tên
-            foundDocument = library.searchDocument(keyword);
-          }
-        }
+        // Đổi mật khẩu
+        actionButtons[5].addActionListener(e -> {
+            JPanel panel = createModernInputPanel();
+            JPasswordField oldPasswordField = new JPasswordField(20);
+            JPasswordField newPasswordField = new JPasswordField(20);
+            JPasswordField confirmPasswordField = new JPasswordField(20);
 
-        // Xử lý nếu tìm thấy tài liệu
-        if (foundDocument != null) {
-          if (foundDocument.getQuantity() > 0) {
-            // Cập nhật danh sách tài liệu đã mượn
-            user.getBorrowedDocuments().add(foundDocument);
-            foundDocument.setQuantity(foundDocument.getQuantity() - 1);
+            addInputField(panel, "Mật khẩu cũ:", oldPasswordField);
+            addInputField(panel, "Mật khẩu mới:", newPasswordField);
+            addInputField(panel, "Xác nhận mật khẩu mới:", confirmPasswordField);
 
-            // Lưu lại thông tin vào file và cập nhật giao diện
-            saveBorrowedDocumentsToFile();
-            populateBorrowedDocumentsTable();
+            int result = showModernDialog(panel, "Đổi mật khẩu");
 
-            JOptionPane.showMessageDialog(
-                UserUI.this,
-                "Mượn tài liệu thành công!",
-                "Thành công",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-          } else {
-            JOptionPane.showMessageDialog(
-                UserUI.this,
-                "Tài liệu không có sẵn!",
-                "Thông báo",
-                JOptionPane.WARNING_MESSAGE
-            );
-          }
-        } else {
-          JOptionPane.showMessageDialog(
-              UserUI.this,
-              "Không tìm thấy tài liệu với từ khóa: " + keyword,
-              "Lỗi",
-              JOptionPane.ERROR_MESSAGE
-          );
-        }
-      }
-    });
+            if (result == JOptionPane.OK_OPTION) {
+                String oldPassword = new String(oldPasswordField.getPassword());
+                String newPassword = new String(newPasswordField.getPassword());
+                String confirmPassword = new String(confirmPasswordField.getPassword());
 
-    returnDocumentButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        // Kiểm tra xem người dùng có mượn tài liệu nào không
-        if (user.getBorrowedDocuments().isEmpty()) {
-          JOptionPane.showMessageDialog(UserUI.this
-                                      , "Bạn chưa mượn tài liệu nào để trả.");
-          return;
-        }
+                if (!newPassword.equals(confirmPassword)) {
+                    showErrorMessage("Mật khẩu xác nhận không khớp!");
+                    return;
+                }
 
-        // Tạo danh sách các tài liệu đã mượn để người dùng chọn
-        String[] borrowedTitles = user.getBorrowedDocuments().stream()
-            .map(Document::getTitle)
-            .toArray(String[]::new);
-        String returnedTitle = (String) JOptionPane.showInputDialog(
-            UserUI.this,
-            "Chọn tài liệu để trả:",
-            "Trả tài liệu",
-            JOptionPane.PLAIN_MESSAGE,
-            null,
-            borrowedTitles,
-            borrowedTitles[0]);
-
-        // Tìm tài liệu được chọn để trả
-        if (returnedTitle != null) {
-          Document returnedDocument = null;
-          for (Document doc : user.getBorrowedDocuments()) {
-            if (doc.getTitle().equals(returnedTitle)) {
-              returnedDocument = doc;
-              break;
+                if (oldPassword.equals(user.getPassword())) {
+                    user.setPassword(newPassword);
+                    updateUserPasswordInFile(user);
+                    showSuccessMessage("Đổi mật khẩu thành công!");
+                } else {
+                    showErrorMessage("Mật khẩu cũ không đúng!");
+                }
             }
-          }
+        });
 
-          if (returnedDocument != null) {
-            // Trả tài liệu (tăng số lượng tài liệu trong thư viện)
-            returnedDocument.setQuantity(returnedDocument.getQuantity() + 1);
-            user.getBorrowedDocuments().remove(returnedDocument);
-
-            // Cập nhật lại file lưu thông tin tài liệu đã mượn
-            saveBorrowedDocumentsToFile();
-
-            // Cập nhật bảng hiển thị các tài liệu đã mượn
-            populateBorrowedDocumentsTable();
-
-            JOptionPane.showMessageDialog(UserUI.this
-                                          , "Trả tài liệu thành công!");
-          }
-        }
-      }
-    });
-
-    changePasswordButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        // Nhập mật khẩu cũ
-        String oldPassword = JOptionPane.showInputDialog(null, "Nhập mật khẩu cũ:");
-        if (oldPassword == null || !oldPassword.equals(user.getPassword())) {
-          JOptionPane.showMessageDialog(null, "Mật khẩu cũ không chính xác!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-
-        // Nhập mật khẩu mới
-        String newPassword = JOptionPane.showInputDialog(null, "Nhập mật khẩu mới:");
-        if (newPassword == null || newPassword.length() < 6) {
-          JOptionPane.showMessageDialog(null, "Mật khẩu mới phải có ít nhất 6 ký tự!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-
-        // Xác nhận mật khẩu mới
-        String confirmPassword = JOptionPane.showInputDialog(null, "Xác nhận mật khẩu mới:");
-        if (!newPassword.equals(confirmPassword)) {
-          JOptionPane.showMessageDialog(null, "Mật khẩu xác nhận không khớp!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-
-        // Cập nhật mật khẩu
-        user.setPassword(newPassword);
-
-        JOptionPane.showMessageDialog(null, "Đổi mật khẩu thành công!");
-      }
-    });
-
-    logoutButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        new LoginUI(library).setVisible(true);
-        dispose();
-      }
-    });
-
-    viewAllDocumentsButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        // Mở giao diện AllDocumentsUI
-        new AllDocumentsUI(library).setVisible(true);
-      }
-    });
-  }
-
-
-  private void saveBorrowedDocumentsToFile() {
-    try (PrintWriter writer = new PrintWriter(new FileWriter(user.getUsername()
-                                              + "_borrowed.txt"))) {
-      for (Document doc : user.getBorrowedDocuments()) {
-        writer.println(doc.getId() + ","
-            + doc.getTitle() + ","
-            + doc.getAuthor() + ","
-            + doc.getGenre());
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
-  }
 
+    private void updateUserInfoInFile(User updatedUser) {
+        List<User> userList = loadUsersFromFile();
 
-  private void loadBorrowedDocumentsFromFile() {
-    File file = new File(user.getUsername() + "_borrowed.txt");
-    if (file.exists()) {
-      // Xóa danh sách tài liệu đã mượn trước khi tải từ file
-      user.getBorrowedDocuments().clear();
-
-      try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-          String[] parts = line.split(",");
-          Document doc = new Document(Integer.parseInt(parts[0]),parts[1]
-              , parts[2] , 1, "N/A",0,parts[3]);
-          user.getBorrowedDocuments().add(doc);
+        for (User u : userList) {
+            if (u.getUsername().equals(updatedUser.getUsername())) {
+                u.setDisplayName(updatedUser.getDisplayName()); // Cập nhật tên hiển thị
+                u.setPhoneNumber(updatedUser.getPhoneNumber()); // Cập nhật số điện thoại
+                u.setBirthDate(updatedUser.getBirthDate());     // Cập nhật ngày sinh
+                break;
+            }
         }
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("users.txt"))) {
+            oos.writeObject(userList); // Lưu danh sách người dùng
+            System.out.println("Cập nhật thông tin người dùng thành công.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi khi lưu danh sách người dùng.");
+        }
     }
-  }
 
+    private void updateUserPasswordInFile(User updatedUser) {
+        List<User> userList = loadUsersFromFile();
 
-  private void populateBorrowedDocumentsTable() {
-    DefaultTableModel tableModel = (DefaultTableModel) borrowedDocumentsTable.getModel();
-    tableModel.setRowCount(0); // Xóa dữ liệu cũ
+        // Cập nhật thông tin người dùng
+        for (User u : userList) {
+            if (u.getUsername().equals(updatedUser.getUsername())) {
+                u.setPassword(updatedUser.getPassword());
+                break;
+            }
+        }
 
-    for (Document doc : user.getBorrowedDocuments()) {
-      Object[] rowData = {
-          doc.getTitle(),   // Tên tài liệu
-          doc.getAuthor(),  // Tên tác giả
-          doc.getGenre()    // Thể loại
-      };
-      tableModel.addRow(rowData);
+        // Ghi lại toàn bộ danh sách vào file
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("users.txt"))) {
+            oos.writeObject(userList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-  }
 
-  // Phương thức tạo nút với kiểu dáng đã được tùy chỉnh
-  private JButton createStyledButton(String text) {
-    JButton button = new JButton(text);
-    button.setBackground(new Color(60, 116, 179, 255));
-    button.setForeground(Color.WHITE);
-    button.setFocusPainted(false);
-    button.setFont(new Font("Arial", Font.BOLD, 14));
-    return button;
-  }
+    private List<User> loadUsersFromFile() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("users.txt"))) {
+            return (List<User>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+
+    private void populateBorrowedDocumentsTable() {
+        // Xóa dữ liệu cũ trong bảng
+        DefaultTableModel tableModel = (DefaultTableModel) borrowedDocumentsTable.getModel();
+        tableModel.setRowCount(0);
+
+        // Đọc danh sách tài liệu đã mượn từ file
+        List<Document> borrowedDocuments = loadBorrowedDocumentsFromFile();
+        user.getBorrowedDocuments().clear(); // Xóa danh sách cũ
+        user.getBorrowedDocuments().addAll(borrowedDocuments); // Cập nhật danh sách tài liệu mượn của User
+
+        // Thêm dữ liệu vào bảng
+        for (Document doc : borrowedDocuments) {
+            tableModel.addRow(new Object[]{
+                doc.getTitle(),
+                doc.getAuthor(),
+                doc.getGenre()
+            });
+        }
+    }
+
+
+    private void saveBorrowedDocumentsToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(user.getUsername() + "_borrowed.txt"))) {
+            oos.writeObject(user.getBorrowedDocuments());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Document> loadBorrowedDocumentsFromFile() {
+        File file = new File(user.getUsername() + "_borrowed.txt");
+        if (!file.exists()) {
+            return new ArrayList<>();
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            return (List<Document>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    private void saveLibraryToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("documents.txt"))) {
+            oos.writeObject(library.getDocuments()); // Lưu toàn bộ danh sách tài liệu
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi khi lưu danh sách tài liệu vào file.");
+        }
+    }
+
+    private void addInputField(JPanel panel, String label, JTextField field) {
+        JPanel fieldPanel = new JPanel(new BorderLayout(10, 5));
+        fieldPanel.setBackground(Color.WHITE);
+
+        // Style cho label
+        JLabel labelComponent = new JLabel(label);
+        labelComponent.setFont(new Font("Roboto", Font.PLAIN, 13));
+        labelComponent.setForeground(new Color(100, 100, 100));
+
+        // Style cho text field
+        field.setFont(new Font("Roboto", Font.PLAIN, 14));
+        field.setPreferredSize(new Dimension(250, 35));
+        field.setBackground(new Color(247, 248, 250));
+        field.setForeground(new Color(50, 50, 50));
+        field.setCaretColor(new Color(41, 128, 185));
+        field.setOpaque(true);
+
+        // Custom border với màu nhạt ở dưới
+        field.setBorder(BorderFactory.createCompoundBorder(
+            new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        // Thêm hiệu ứng hover và focus
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                field.setBackground(new Color(242, 243, 245));
+                field.setBorder(BorderFactory.createCompoundBorder(
+                    new MatteBorder(0, 0, 2, 0, new Color(41, 128, 185)),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                ));
+            }
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                field.setBackground(new Color(247, 248, 250));
+                field.setBorder(BorderFactory.createCompoundBorder(
+                    new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                ));
+            }
+        });
+
+        fieldPanel.add(labelComponent, BorderLayout.NORTH);
+        fieldPanel.add(field, BorderLayout.CENTER);
+        fieldPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 15, 0));
+
+        panel.add(fieldPanel);
+    }
+
+    // Cập nhật lại createModernInputPanel() để có padding tốt hơn
+    private JPanel createModernInputPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
+        panel.setBackground(Color.WHITE);
+
+        // Thêm tiêu đề cho panel
+        JLabel titleLabel = new JLabel("Enter Information");
+        titleLabel.setFont(new Font("Roboto", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(50, 50, 50));
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        panel.add(titleLabel);
+
+        return panel;
+    }
+
+    // Cập nhật showModernDialog() để dialog đẹp hơn
+    private int showModernDialog(JPanel panel, String title) {
+        UIManager.put("OptionPane.background", Color.WHITE);
+        UIManager.put("Panel.background", Color.WHITE);
+        UIManager.put("OptionPane.buttonFont", new Font("Roboto", Font.PLAIN, 13));
+        UIManager.put("OptionPane.messageFont", new Font("Roboto", Font.PLAIN, 13));
+
+        JOptionPane optionPane = new JOptionPane(
+            panel,
+            JOptionPane.PLAIN_MESSAGE,
+            JOptionPane.OK_CANCEL_OPTION
+        );
+
+        // Tạo custom dialog
+        JDialog dialog = optionPane.createDialog(this, title);
+        dialog.setBackground(Color.WHITE);
+
+        // Set size phù hợp
+        dialog.setSize(400, dialog.getHeight());
+        dialog.setLocationRelativeTo(this);
+
+        dialog.setVisible(true);
+
+        Object selectedValue = optionPane.getValue();
+        if (selectedValue == null)
+            return JOptionPane.CLOSED_OPTION;
+        return ((Integer)selectedValue).intValue();
+    }
+
+    private void showSuccessMessage(String message) {
+        JOptionPane.showMessageDialog(
+            this, message, "Success",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(
+            this, message, "Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+
 }
