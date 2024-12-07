@@ -18,6 +18,8 @@ public class DocumentDetailsUI extends JFrame {
     private final Library library;
     private final JPanel reviewsPanel;
 
+    private int selectedRating = 0; // Lưu số sao được chọn
+
     public DocumentDetailsUI(Document document, Library library) {
         this.document = document;
         this.library = library;
@@ -127,31 +129,57 @@ public class DocumentDetailsUI extends JFrame {
         ratingLabel.setFont(HEADER_FONT);
         panel.add(ratingLabel, gbc);
 
-        JSlider ratingSlider = createStyledSlider();
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
-        panel.add(ratingSlider, gbc);
+        // Add 5 star icons
+        JLabel[] stars = new JLabel[5];
+        for (int i = 0; i < stars.length; i++) {
+            ImageIcon emptyStar = new ImageIcon("image/Empty Star.png");
+            Image scaledEmptyStar = emptyStar.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+            stars[i] = new JLabel(new ImageIcon(scaledEmptyStar));
+            stars[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            final int index = i; // lưu chỉ số sao
+            stars[i].addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    updateStars(stars, index + 1);
+                }
+            });
+
+            gbc.gridx = i + 1;
+            panel.add(stars[i], gbc);
+        }
 
         JButton submitButton = createStyledButton("Gửi đánh giá");
-        submitButton.addActionListener(e -> addReview(ratingSlider.getValue() / 2.0));
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
+        submitButton.addActionListener(e -> {
+            if (selectedRating > 0) {
+                addReview(selectedRating);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "Vui lòng chọn ít nhất 1 sao!",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        gbc.gridx = stars.length + 1;
         panel.add(submitButton, gbc);
 
         return panel;
     }
 
-    private JSlider createStyledSlider() {
-        JSlider slider = new JSlider(0, 10, 5);
-        slider.setMajorTickSpacing(2);
-        slider.setMinorTickSpacing(1);
-        slider.setPaintTicks(true);
-        slider.setPaintLabels(true);
-        slider.setBackground(CARD_COLOR);
-        slider.setForeground(PRIMARY_COLOR);
-        return slider;
+    private void updateStars(JLabel[] stars, int rating) {
+        this.selectedRating = rating;
+        for (int i = 0; i < stars.length; i++) {
+            if (i < rating) {
+                ImageIcon fullStar = new ImageIcon("image/Full Star.png");
+                Image scaledFullStar = fullStar.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+                stars[i].setIcon(new ImageIcon(scaledFullStar));
+            } else {
+                ImageIcon emptyStar = new ImageIcon("image/Empty Star.png");
+                Image scaledEmptyStar = emptyStar.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+                stars[i].setIcon(new ImageIcon(scaledEmptyStar));
+            }
+        }
     }
 
     private JButton createStyledButton(String text) {
@@ -182,22 +210,32 @@ public class DocumentDetailsUI extends JFrame {
             noReviewLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
             reviewsPanel.add(noReviewLabel);
         } else {
-            // Average rating
+            // Tính toán đánh giá trung bình
             double averageRating = reviews.stream()
                 .mapToDouble(Review::getRating)
                 .average()
                 .orElse(0.0);
 
-            JLabel avgLabel = createStyledLabel(
-                String.format("Đánh giá trung bình: %.1f/5*", averageRating),
-                HEADER_FONT
-            );
+            // Panel hiển thị đánh giá trung bình
+            JPanel averagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+            averagePanel.setBackground(CARD_COLOR);
+            averagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            // Hiển thị số điểm trung bình
+            JLabel avgLabel = createStyledLabel(String.format("Đánh giá trung bình: %.1f/5", averageRating), HEADER_FONT);
             avgLabel.setForeground(PRIMARY_COLOR);
-            avgLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            reviewsPanel.add(avgLabel);
+            averagePanel.add(avgLabel);
+
+            // Thêm biểu tượng sao đầy
+            ImageIcon fullStar = new ImageIcon("image/Full Star.png");
+            Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+            JLabel starLabel = new JLabel(new ImageIcon(scaledFullStar));
+            averagePanel.add(starLabel);
+
+            reviewsPanel.add(averagePanel);
             reviewsPanel.add(Box.createVerticalStrut(15));
 
-            // Individual reviews
+            // Hiển thị các đánh giá cá nhân
             for (Review review : reviews) {
                 JPanel reviewCard = createReviewCard(review);
                 reviewCard.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -219,15 +257,31 @@ public class DocumentDetailsUI extends JFrame {
             new EmptyBorder(10, 10, 10, 10)
         ));
 
-        JLabel ratingLabel = createStyledLabel(
-            String.format("%.1f/5*", review.getRating()),
-            HEADER_FONT
-        );
-        ratingLabel.setForeground(PRIMARY_COLOR);
+        // Hiển thị tên người đánh giá
+        JLabel userLabel = createStyledLabel("Người đánh giá: " + review.getUsername(), CONTENT_FONT);
+        userLabel.setForeground(new Color(100, 100, 100));
+        userLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        // Hiển thị đánh giá bằng biểu tượng sao
+        JPanel starsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        starsPanel.setBackground(new Color(245, 245, 245));
+        starsPanel.setAlignmentX(Component.LEFT_ALIGNMENT); // Đảm bảo thẳng hàng với phần còn lại
+
+        for (int i = 0; i < (int) review.getRating(); i++) {
+            ImageIcon fullStar = new ImageIcon("image/Full Star.png");
+            Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+            JLabel starLabel = new JLabel(new ImageIcon(scaledFullStar));
+            starsPanel.add(starLabel);
+        }
+
+        // Hiển thị bình luận
         JLabel commentLabel = createStyledLabel(review.getComment(), CONTENT_FONT);
+        commentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        card.add(ratingLabel);
+        // Thêm các thành phần vào card
+        card.add(userLabel);
+        card.add(Box.createVerticalStrut(5));
+        card.add(starsPanel); // Đảm bảo thẳng hàng với phần userLabel
         card.add(Box.createVerticalStrut(5));
         card.add(commentLabel);
 
@@ -247,9 +301,14 @@ public class DocumentDetailsUI extends JFrame {
             JOptionPane.PLAIN_MESSAGE);
 
         if (comment != null && !comment.trim().isEmpty()) {
-            Review newReview = new Review("người đánh giá", rating, comment.trim());
+            // Lấy tên hiển thị của người đang đăng nhập
+            String currentUserDisplayName = library.getCurrentUserDisplayName();
+
+            Review newReview = new Review(currentUserDisplayName, rating, comment.trim());
+
+            // Lưu đánh giá
             library.addReview(document.getId(), newReview);
-            displayReviews();
+            displayReviews(); // Hiển thị lại danh sách đánh giá
         } else if (comment != null) {
             JOptionPane.showMessageDialog(this,
                 "Bình luận không được để trống.",
@@ -257,4 +316,5 @@ public class DocumentDetailsUI extends JFrame {
                 JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }

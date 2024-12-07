@@ -9,6 +9,17 @@ public class Library {
   private static final String DOCUMENT_FILE = "documents.txt";
   private static final String USER_FILE = "users.txt";
   private HashMap<Integer, List<Review>> reviewsMap;
+  private User currentUser;
+
+  // Getter cho currentUser
+  public User getCurrentUser() {
+    return currentUser;
+  }
+
+  // Setter cho currentUser
+  public void setCurrentUser(User user) {
+    this.currentUser = user;
+  }
 
   public Library() {
     reviewsMap = new HashMap<>();
@@ -220,4 +231,14 @@ public class Library {
       e.printStackTrace();
     }
   }
+
+  public String getCurrentUserDisplayName() {
+    if (currentUser != null) {
+      return currentUser.getDisplayName(); // Tên hiển thị của người dùng
+    } else {
+      // Tài khoản admin
+      return "Quản Trị Viên";
+    }
+  }
+
 }

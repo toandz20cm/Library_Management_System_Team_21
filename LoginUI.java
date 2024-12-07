@@ -136,6 +136,7 @@ public class LoginUI extends JFrame {
         if (validateCredentials(username, password)) {
           User user = library.authenticateUser(username, password);
           if (user != null) {
+            library.setCurrentUser(user); // Lưu trạng thái đăng nhập
             new UserUI(library, user).setVisible(true);
             dispose();
           } else {
@@ -210,6 +211,7 @@ public class LoginUI extends JFrame {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
         if (username.equals("admin") && password.equals("1")) {
+          library.setCurrentUser(null); // lưu trạng thái đăng nhập của Admin
           new AdminUI(library).setVisible(true);
           dispose();
         } else {

@@ -359,6 +359,7 @@ public class UserUI extends JFrame {
                 return;
             }
 
+            // Hiển thị danh sách các tài liệu mà người dùng đã mượn
             String[] borrowedTitles = user.getBorrowedDocuments().stream()
                 .map(Document::getTitle)
                 .toArray(String[]::new);
@@ -374,21 +375,31 @@ public class UserUI extends JFrame {
             );
 
             if (returnedTitle != null) {
+                // Tìm tài liệu trong danh sách tài liệu đã mượn
                 Document returnedDocument = user.getBorrowedDocuments().stream()
                     .filter(doc -> doc.getTitle().equals(returnedTitle))
                     .findFirst()
                     .orElse(null);
 
                 if (returnedDocument != null) {
-                    returnedDocument.setQuantity(returnedDocument.getQuantity() + 1);
+                    // Tìm tài liệu trong thư viện để cập nhật số lượng
+                    Document libraryDocument = library.getDocuments().stream()
+                        .filter(doc -> doc.getId() == returnedDocument.getId()) // So sánh theo ID
+                        .findFirst()
+                        .orElse(null);
 
-                    // Lưu danh sách tài liệu vào file
-                    saveLibraryToFile(); // <== Lưu lại sau khi cập nhật số lượng
+                    if (libraryDocument != null) {
+                        // Cập nhật số lượng trong thư viện
+                        libraryDocument.setQuantity(libraryDocument.getQuantity() + 1);
+                    }
 
+                    // Loại bỏ tài liệu khỏi danh sách tài liệu đã mượn của người dùng
                     user.getBorrowedDocuments().remove(returnedDocument);
 
-                    saveBorrowedDocumentsToFile();
-                    populateBorrowedDocumentsTable();
+                    // Lưu lại thay đổi vào file và cập nhật giao diện
+                    saveLibraryToFile(); // Lưu danh sách tài liệu trong thư viện
+                    saveBorrowedDocumentsToFile(); // Lưu danh sách tài liệu đã mượn
+                    populateBorrowedDocumentsTable(); // Cập nhật giao diện
 
                     JOptionPane.showMessageDialog(
                         this,

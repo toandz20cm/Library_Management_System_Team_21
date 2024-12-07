@@ -5,9 +5,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.MatteBorder;
@@ -260,29 +262,37 @@ public class AdminUI extends JFrame {
             }
         });
 
-        // Delete Document Action
         deleteDocumentButton.addActionListener(e -> {
             JPanel panel = createModernInputPanel();
-            JTextField idField = new JTextField(20);
-            addInputField(panel, "Document ID:", idField);
+
+            // Thay thế idField bằng JComboBox để hiển thị danh sách tài liệu
+            JComboBox<Document> documentComboBox = new JComboBox<>();
+            library.getDocuments().forEach(documentComboBox::addItem); // Thêm tài liệu vào JComboBox
+            addInputField(panel, "Select Document:", documentComboBox);
 
             int result = showModernDialog(panel, "Delete Document");
 
             if (result == JOptionPane.OK_OPTION) {
-                try {
-                    int id = Integer.parseInt(idField.getText());
+                // Lấy tài liệu được chọn
+                Document selectedDocument = (Document) documentComboBox.getSelectedItem();
+                if (selectedDocument != null) {
+                    int id = selectedDocument.getId();
                     library.removeDocument(id);
                     showSuccessMessage("Document deleted successfully!");
-                } catch (NumberFormatException ex) {
-                    showErrorMessage("Invalid ID format!");
+                } else {
+                    showErrorMessage("No document selected!");
                 }
             }
         });
 
+
         // Edit Document Action
         editDocumentButton.addActionListener(e -> {
             JPanel panel = createModernInputPanel();
-            JTextField idField = new JTextField(10);
+
+            // Thay thế idField bằng JComboBox
+            JComboBox<Document> documentComboBox = new JComboBox<>();
+            library.getDocuments().forEach(documentComboBox::addItem); // Thêm các tài liệu vào JComboBox
             JTextField titleField = new JTextField(10);
             JTextField authorField = new JTextField(10);
             JTextField quantityField = new JTextField(10);
@@ -290,43 +300,79 @@ public class AdminUI extends JFrame {
             JTextField publicationYearField = new JTextField(10);
             JTextField genreField = new JTextField(10);
 
-            addInputField(panel, "Document ID:", idField);
-            addInputField(panel, "New Title:", titleField);
-            addInputField(panel, "New Author:", authorField);
-            addInputField(panel, "New Quantity:", quantityField);
-            addInputField(panel, "New ISBN:", isbnField);
-            addInputField(panel, "New Publication Year:", publicationYearField);
-            addInputField(panel, "New Genre:", genreField);
+            // Tạo các ô nhập liệu
+            addInputField(panel, "Select Document:", documentComboBox);
+            addInputField(panel, "Title:", titleField);
+            addInputField(panel, "Author:", authorField);
+            addInputField(panel, "Quantity:", quantityField);
+            addInputField(panel, "ISBN:", isbnField);
+            addInputField(panel, "Publication Year:", publicationYearField);
+            addInputField(panel, "Genre:", genreField);
 
-            // Bọc panel bằng JScrollPane để có thanh cuộn
-            JScrollPane scrollPane = new JScrollPane(panel);
-            scrollPane.setPreferredSize(new Dimension(400, 300)); // Kích thước cố định cho cửa sổ cuộn
-            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            // Lắng nghe sự kiện thay đổi lựa chọn trong JComboBox
+            documentComboBox.addActionListener(event -> {
+                Document selectedDocument = (Document) documentComboBox.getSelectedItem();
+                if (selectedDocument != null) {
+                    // Tự động điền thông tin tài liệu vào các ô nhập liệu
+                    titleField.setText(selectedDocument.getTitle());
+                    authorField.setText(selectedDocument.getAuthor());
+                    quantityField.setText(String.valueOf(selectedDocument.getQuantity()));
+                    isbnField.setText(selectedDocument.getIsbn());
+                    publicationYearField.setText(String.valueOf(selectedDocument.getPublicationYear()));
+                    genreField.setText(selectedDocument.getGenre());
+                }
+            });
 
-            // Hiển thị dialog với thanh cuộn
-            int result = JOptionPane.showConfirmDialog(
-                null, scrollPane, "Edit Document", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
-            );
+            // Hiển thị thông tin tài liệu đầu tiên mặc định
+            if (documentComboBox.getItemCount() > 0) {
+                Document firstDocument = (Document) documentComboBox.getItemAt(0);
+                if (firstDocument != null) {
+                    titleField.setText(firstDocument.getTitle());
+                    authorField.setText(firstDocument.getAuthor());
+                    quantityField.setText(String.valueOf(firstDocument.getQuantity()));
+                    isbnField.setText(firstDocument.getIsbn());
+                    publicationYearField.setText(String.valueOf(firstDocument.getPublicationYear()));
+                    genreField.setText(firstDocument.getGenre());
+                }
+            }
+
+            // Hiển thị hộp thoại
+            int result = showModernDialog(panel, "Edit Document");
 
             if (result == JOptionPane.OK_OPTION) {
                 try {
-                    int id = Integer.parseInt(idField.getText());
-                    int quantity = Integer.parseInt(quantityField.getText());
-                    int publicationYear = Integer.parseInt(publicationYearField.getText());
-                    String title = titleField.getText();
-                    String author = authorField.getText();
-                    String isbn = isbnField.getText();
-                    String genre = genreField.getText();
+                    // Lấy tài liệu được chọn
+                    Document selectedDocument = (Document) documentComboBox.getSelectedItem();
+                    if (selectedDocument != null) {
+                        // Lấy dữ liệu đã chỉnh sửa từ các ô nhập liệu
+                        String title = titleField.getText();
+                        String author = authorField.getText();
+                        int quantity = Integer.parseInt(quantityField.getText());
+                        String isbn = isbnField.getText();
+                        int publicationYear = Integer.parseInt(publicationYearField.getText());
+                        String genre = genreField.getText();
 
-                    // Gọi phương thức editDocument để cập nhật thông tin
-                    library.editDocument(id, title, author, quantity, isbn, publicationYear, genre);
-                    showSuccessMessage("Document updated successfully!");
+                        // Cập nhật thông tin tài liệu
+                        library.editDocument(
+                            selectedDocument.getId(), // Giữ nguyên ID tài liệu
+                            title,
+                            author,
+                            quantity,
+                            isbn,
+                            publicationYear,
+                            genre
+                        );
+
+                        showSuccessMessage("Document updated successfully!");
+                    } else {
+                        showErrorMessage("No document selected. Please try again.");
+                    }
                 } catch (NumberFormatException ex) {
                     showErrorMessage("Invalid input format! Please check your input.");
                 }
             }
         });
+
 
         // Search Document Action
         searchDocumentButton.addActionListener(e -> {
@@ -421,7 +467,8 @@ public class AdminUI extends JFrame {
             dispose();
         });
     }
-    private void addInputField(JPanel panel, String label, JTextField field) {
+
+    private void addInputField(JPanel panel, String label, JComponent field) {
         JPanel fieldPanel = new JPanel(new BorderLayout(10, 5));
         fieldPanel.setBackground(Color.WHITE);
 
@@ -430,40 +477,53 @@ public class AdminUI extends JFrame {
         labelComponent.setFont(new Font("Roboto", Font.PLAIN, 13));
         labelComponent.setForeground(new Color(100, 100, 100));
 
-        // Style cho text field
-        field.setFont(new Font("Roboto", Font.PLAIN, 14));
-        field.setPreferredSize(new Dimension(250, 35));
-        field.setBackground(new Color(247, 248, 250));
-        field.setForeground(new Color(50, 50, 50));
-        field.setCaretColor(new Color(41, 128, 185));
-        field.setOpaque(true);
+        // Kiểm tra nếu là JTextField để áp dụng style riêng
+        if (field instanceof JTextField) {
+            JTextField textField = (JTextField) field;
+            textField.setFont(new Font("Roboto", Font.PLAIN, 14));
+            textField.setPreferredSize(new Dimension(250, 35));
+            textField.setBackground(new Color(247, 248, 250));
+            textField.setForeground(new Color(50, 50, 50));
+            textField.setCaretColor(new Color(41, 128, 185));
+            textField.setOpaque(true);
 
-        // Custom border với màu nhạt ở dưới
-        field.setBorder(BorderFactory.createCompoundBorder(
-            new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+            // Custom border với màu nhạt ở dưới
+            textField.setBorder(BorderFactory.createCompoundBorder(
+                new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
 
-        // Thêm hiệu ứng hover và focus
-        field.addFocusListener(new java.awt.event.FocusAdapter() {
-            @Override
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                field.setBackground(new Color(242, 243, 245));
-                field.setBorder(BorderFactory.createCompoundBorder(
-                    new MatteBorder(0, 0, 2, 0, new Color(41, 128, 185)),
-                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
-                ));
-            }
+            // Thêm hiệu ứng hover và focus
+            textField.addFocusListener(new java.awt.event.FocusAdapter() {
+                @Override
+                public void focusGained(java.awt.event.FocusEvent evt) {
+                    textField.setBackground(new Color(242, 243, 245));
+                    textField.setBorder(BorderFactory.createCompoundBorder(
+                        new MatteBorder(0, 0, 2, 0, new Color(41, 128, 185)),
+                        BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                    ));
+                }
 
-            @Override
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                field.setBackground(new Color(247, 248, 250));
-                field.setBorder(BorderFactory.createCompoundBorder(
-                    new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
-                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
-                ));
-            }
-        });
+                @Override
+                public void focusLost(java.awt.event.FocusEvent evt) {
+                    textField.setBackground(new Color(247, 248, 250));
+                    textField.setBorder(BorderFactory.createCompoundBorder(
+                        new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
+                        BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                    ));
+                }
+            });
+        }
+
+        // Style riêng cho JComboBox (nếu cần)
+        if (field instanceof JComboBox) {
+            JComboBox<?> comboBox = (JComboBox<?>) field;
+            comboBox.setFont(new Font("Roboto", Font.PLAIN, 14));
+            comboBox.setPreferredSize(new Dimension(250, 35));
+            comboBox.setBackground(new Color(247, 248, 250));
+            comboBox.setForeground(new Color(50, 50, 50));
+            comboBox.setOpaque(true);
+        }
 
         fieldPanel.add(labelComponent, BorderLayout.NORTH);
         fieldPanel.add(field, BorderLayout.CENTER);
@@ -472,20 +532,13 @@ public class AdminUI extends JFrame {
         panel.add(fieldPanel);
     }
 
+
     // Cập nhật lại createModernInputPanel() để có padding tốt hơn
     private JPanel createModernInputPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
         panel.setBackground(Color.WHITE);
-
-        // Thêm tiêu đề cho panel
-        JLabel titleLabel = new JLabel("Enter Information");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 18));
-        titleLabel.setForeground(new Color(50, 50, 50));
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        panel.add(titleLabel);
 
         return panel;
     }
@@ -695,12 +748,11 @@ public class AdminUI extends JFrame {
         @Override
         protected void done() {
             try {
-                // Lấy kết quả từ Google Books API
+                // Lấy kết quả từ doInBackground()
                 List<Document> documents = get();
-                // Hiển thị kết quả trong bảng
-                tableModel.setRowCount(0); // Xóa kết quả cũ
 
-                // Thêm dữ liệu vào bảng
+                // Hiển thị kết quả trong bảng
+                tableModel.setRowCount(0);
                 for (Document doc : documents) {
                     tableModel.addRow(new Object[]{
                         doc.getTitle(),
@@ -711,14 +763,45 @@ public class AdminUI extends JFrame {
                         "Add"
                     });
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Error occurred while fetching books.", "Error", JOptionPane.ERROR_MESSAGE);
+
+                if (documents.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Không tìm thấy tài liệu phù hợp với từ khóa.",
+                        "Kết quả rỗng",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof UnknownHostException) {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet.",
+                        "Lỗi mạng",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Đã xảy ra lỗi không mong muốn: " + cause.getMessage(),
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            } catch (InterruptedException e) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Tác vụ đã bị gián đoạn.",
+                    "Lỗi",
+                    JOptionPane.WARNING_MESSAGE
+                );
             } finally {
-                // Bật lại nút "Search" khi hoàn tất
+                // Bật lại nút "Search"
                 searchButton.setEnabled(true);
             }
         }
+
     }
 
     // Renderer cho nút "Add"

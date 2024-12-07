@@ -70,6 +70,7 @@ public class AllDocumentsUI extends JFrame {
                 return c;
             }
         });
+
     }
 
     private void populateTableData() {

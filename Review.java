@@ -20,4 +20,9 @@ public class Review {
   public String getComment() {
     return comment;
   }
+
+  @Override
+  public String toString() {
+    return username + ": " + comment + " (" + rating + "/5)";
+  }
 }
