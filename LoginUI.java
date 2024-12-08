@@ -1,5 +1,4 @@
 import java.text.ParseException;
-import java.util.Properties;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,12 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import javax.swing.border.MatteBorder;
-import org.jdatepicker.impl.DateComponentFormatter;
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 
 class RoundedButton extends JButton {
   public RoundedButton(String text) {
@@ -161,36 +155,15 @@ public class LoginUI extends JFrame {
         JTextField usernameField = new JTextField(20);
         JPasswordField passwordField = new JPasswordField(20);
         JTextField displayNameField = new JTextField(20);
+        JTextField birthDateField = new JTextField(20);
         JTextField phoneNumberField = new JTextField(20);
-
-        // Tạo Date Picker (Lịch chọn ngày)
-        UtilDateModel model = new UtilDateModel();
-        Properties properties = new Properties();
-        properties.put("text.today", "Hôm nay");
-        properties.put("text.month", "Tháng");
-        properties.put("text.year", "Năm");
-        JDatePanelImpl datePanel = new JDatePanelImpl(model, properties);
-        JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateComponentFormatter());
-
-        // Tạo một panel cho "Ngày sinh:"
-        JPanel datePanelWrapper = new JPanel();
-        datePanelWrapper.setLayout(new BoxLayout(datePanelWrapper, BoxLayout.X_AXIS));
-
-        // Tạo JLabel cho "Ngày sinh:" với các thuộc tính
-        JLabel birthDateLabel = new JLabel("Ngày sinh:");
-        birthDateLabel.setFont(new Font("Roboto", Font.PLAIN, 14));  // Áp dụng phông chữ giống các ô
-        birthDateLabel.setForeground(new Color(100, 100, 100));     // Màu chữ nhạt
-        birthDateLabel.setPreferredSize(new Dimension(120, 35));     // Căn chỉnh chiều rộng và chiều cao cho label
-        datePanelWrapper.add(birthDateLabel);  // Thêm label vào panel
-
-        datePanelWrapper.add(datePicker);  // Thêm date picker vào panel
 
         // Thêm các trường vào panel
         addInputField(panel, "Username (ít nhất 6 ký tự):", usernameField);
         addInputField(panel, "Password (ít nhất 6 ký tự):", passwordField);
         addInputField(panel, "Tên hiển thị:", displayNameField);
+        addInputField(panel, "Ngày sinh (dd/MM/yyyy):", birthDateField);
         addInputField(panel, "Số điện thoại (10 chữ số):", phoneNumberField);
-        panel.add(datePanelWrapper); // Thêm panel chứa date picker vào form
 
         // Hiển thị hộp thoại đăng ký hiện đại
         int result = showModernDialog(panel, "Đăng ký tài khoản mới");
@@ -200,17 +173,8 @@ public class LoginUI extends JFrame {
           String username = usernameField.getText();
           String password = new String(passwordField.getPassword());
           String displayName = displayNameField.getText();
+          String birthDate = birthDateField.getText();
           String phoneNumber = phoneNumberField.getText();
-          Date selectedDate = (Date) datePicker.getModel().getValue();
-
-          // Kiểm tra ngày sinh được chọn
-          Date currentDate = new Date(); // Lấy ngày hiện tại
-          if (selectedDate == null || !selectedDate.before(currentDate)) {
-            JOptionPane.showMessageDialog(null, "Ngày sinh không hợp lệ! Vui lòng chọn ngày trước ngày hôm nay.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-          }
-
-          String birthDate = new SimpleDateFormat("dd/MM/yyyy").format(selectedDate);
 
           // Kiểm tra độ dài username và password
           if (username.length() < 6 || password.length() < 6) {
@@ -218,6 +182,11 @@ public class LoginUI extends JFrame {
             return;
           }
 
+          // Kiểm tra ngày sinh và số điện thoại hợp lệ
+          if (!isValidBirthDate(birthDate)) {
+            showErrorMessage("Ngày sinh không hợp lệ! Vui lòng nhập đúng định dạng dd/MM/yyyy.");
+            return;
+          }
           if (!isValidPhoneNumber(phoneNumber)) {
             showErrorMessage("Số điện thoại không hợp lệ! Vui lòng nhập số có 10 chữ số.");
             return;
@@ -236,8 +205,6 @@ public class LoginUI extends JFrame {
         }
       }
     });
-
-
 
     adminLoginButton.addActionListener(new ActionListener() {
       @Override
@@ -441,6 +408,14 @@ public class LoginUI extends JFrame {
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     panel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
     panel.setBackground(Color.WHITE);
+
+    // Thêm tiêu đề cho panel
+    JLabel titleLabel = new JLabel("Enter Information");
+    titleLabel.setFont(new Font("Roboto", Font.BOLD, 18));
+    titleLabel.setForeground(new Color(50, 50, 50));
+    titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+    panel.add(titleLabel);
 
     return panel;
   }
