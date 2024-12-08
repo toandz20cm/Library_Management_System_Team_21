@@ -1,18 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Properties;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.table.*;
 import java.io.*;
 import java.util.List;
-import org.jdatepicker.impl.DateComponentFormatter;
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
 
 public class UserUI extends JFrame {
   // Màu sắc chung
@@ -259,63 +252,29 @@ public class UserUI extends JFrame {
       JPanel panel = createModernInputPanel();
       JTextField displayNameField = new JTextField(user.getDisplayName(), 20);
       JTextField phoneNumberField = new JTextField(user.getPhoneNumber(), 20);
+      JTextField birthDateField = new JTextField(user.getBirthDate(), 20);
 
-      // Tạo Date Picker cho ngày sinh
-      UtilDateModel model = new UtilDateModel();
-      Properties properties = new Properties();
-      properties.put("text.today", "Hôm nay");
-      properties.put("text.month", "Tháng");
-      properties.put("text.year", "Năm");
-      JDatePanelImpl datePanel = new JDatePanelImpl(model, properties);
-      JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateComponentFormatter());
-
-      // Thêm các trường vào panel
       addInputField(panel, "Tên hiển thị:", displayNameField);
       addInputField(panel, "Số điện thoại:", phoneNumberField);
-
-      // Tạo panel cho ngày sinh và thêm vào form
-      JPanel birthDatePanel = new JPanel();
-      birthDatePanel.setLayout(new BoxLayout(birthDatePanel, BoxLayout.X_AXIS));
-      birthDatePanel.add(new JLabel("Ngày sinh:"));
-      birthDatePanel.add(datePicker);
-      panel.add(birthDatePanel);
+      addInputField(panel, "Ngày sinh:", birthDateField);
 
       int result = showModernDialog(panel, "Chỉnh sửa thông tin");
 
       if (result == JOptionPane.OK_OPTION) {
         String newDisplayName = displayNameField.getText();
         String newPhoneNumber = phoneNumberField.getText();
-        Date selectedDate = (Date) datePicker.getModel().getValue();
+        String newBirthDate = birthDateField.getText();
 
-        // Kiểm tra các trường thông tin
-        if (newDisplayName.trim().isEmpty() || newPhoneNumber.trim().isEmpty() || selectedDate == null) {
+        if (newDisplayName.trim().isEmpty() || newPhoneNumber.trim().isEmpty() || newBirthDate.trim().isEmpty()) {
           showErrorMessage("Vui lòng điền đầy đủ thông tin!");
           return;
         }
 
-        // Kiểm tra số điện thoại phải có đúng 10 chữ số
-        if (newPhoneNumber.length() != 10 || !newPhoneNumber.matches("\\d{10}")) {
-          showErrorMessage("Số điện thoại phải có 10 chữ số!");
-          return;
-        }
-
-        // Kiểm tra ngày sinh phải trước ngày hôm nay
-        Date currentDate = new Date();
-        if (selectedDate.after(currentDate)) {
-          showErrorMessage("Ngày sinh phải trước ngày hôm nay!");
-          return;
-        }
-
-        // Định dạng ngày sinh
-        String newBirthDate = new SimpleDateFormat("dd/MM/yyyy").format(selectedDate);
-
-        // Cập nhật thông tin người dùng
         user.setDisplayName(newDisplayName);
         user.setPhoneNumber(newPhoneNumber);
         user.setBirthDate(newBirthDate);
         updateUserInfoInFile(user);
 
-        // Cập nhật thông tin hiển thị
         displayNameLabel.setText("Tên hiển thị: " + user.getDisplayName());
         phoneNumberLabel.setText("Số điện thoại: " + user.getPhoneNumber());
         birthDateLabel.setText("Ngày sinh: " + user.getBirthDate());
