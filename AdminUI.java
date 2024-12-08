@@ -866,25 +866,30 @@ public class AdminUI extends JFrame {
           }
 
           // Kiểm tra trùng lặp trong thư viện
-          boolean isDuplicate = library.getDocuments().stream().anyMatch(doc -> doc.getIsbn().equals(isbn));
-          if (isDuplicate) {
-            JOptionPane.showMessageDialog(button, "This document already exists in the library.", "Duplicate Document", JOptionPane.WARNING_MESSAGE);
-            return label;
+          Document duplicateDoc = library.getDocuments().stream()
+              .filter(doc -> doc.getIsbn().equals(isbn))
+              .findFirst()
+              .orElse(null);
+
+          if (duplicateDoc != null) {
+            // Nếu tài liệu đã tồn tại, tăng số lượng
+            duplicateDoc.setQuantity(duplicateDoc.getQuantity() + 1);
+            JOptionPane.showMessageDialog(button, "This document already exists. Quantity has been updated.", "Document Updated", JOptionPane.INFORMATION_MESSAGE);
+          } else {
+            // Thêm tài liệu mới vào thư viện
+            Document doc = new Document(
+                library.getDocuments().size() + 1,
+                title,
+                author,
+                1, // Số lượng khởi tạo là 1
+                isbn,
+                year,
+                genre
+            );
+
+            library.addDocument(doc);
+            JOptionPane.showMessageDialog(button, "Document added successfully: " + title, "Success", JOptionPane.INFORMATION_MESSAGE);
           }
-
-          // Thêm tài liệu mới vào thư viện
-          Document doc = new Document(
-              library.getDocuments().size() + 1,
-              title,
-              author,
-              1,
-              isbn,
-              year,
-              genre
-          );
-
-          library.addDocument(doc);
-          JOptionPane.showMessageDialog(button, "Document added successfully: " + title, "Success", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {
           JOptionPane.showMessageDialog(button, "An error occurred while adding the document.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -894,6 +899,7 @@ public class AdminUI extends JFrame {
       clicked = false;
       return label;
     }
+
 
     @Override
     public boolean stopCellEditing() {
