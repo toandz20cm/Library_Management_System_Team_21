@@ -187,6 +187,7 @@ public class LoginUI extends JFrame {
             showErrorMessage("Ngày sinh không hợp lệ! Vui lòng nhập đúng định dạng dd/MM/yyyy.");
             return;
           }
+
           if (!isValidPhoneNumber(phoneNumber)) {
             showErrorMessage("Số điện thoại không hợp lệ! Vui lòng nhập số có 10 chữ số.");
             return;

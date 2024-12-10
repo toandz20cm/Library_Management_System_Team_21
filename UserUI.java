@@ -1,5 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -267,6 +269,17 @@ public class UserUI extends JFrame {
 
         if (newDisplayName.trim().isEmpty() || newPhoneNumber.trim().isEmpty() || newBirthDate.trim().isEmpty()) {
           showErrorMessage("Vui lòng điền đầy đủ thông tin!");
+          return;
+        }
+
+        // Kiểm tra ngày sinh và số điện thoại hợp lệ
+        if (!isValidBirthDate(newBirthDate)) {
+          showErrorMessage("Ngày sinh không hợp lệ! Vui lòng nhập đúng định dạng dd/MM/yyyy.");
+          return;
+        }
+
+        if (!isValidPhoneNumber(newPhoneNumber)) {
+          showErrorMessage("Số điện thoại không hợp lệ! Vui lòng nhập số có 10 chữ số.");
           return;
         }
 
@@ -669,6 +682,22 @@ public class UserUI extends JFrame {
         this, message, "Error",
         JOptionPane.ERROR_MESSAGE
     );
+  }
+
+  private boolean isValidBirthDate(String birthDate) {
+    try {
+      SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+      sdf.setLenient(false);
+      sdf.parse(birthDate);
+      return true;
+    } catch (ParseException e) {
+      return false;
+    }
+  }
+
+  // Hàm kiểm tra tính hợp lệ của số điện thoại (chỉ chứa số và 10 chữ số)
+  private boolean isValidPhoneNumber(String phoneNumber) {
+    return phoneNumber.matches("\\d{10}");
   }
 
 }
