@@ -1,0 +1,4 @@
+Quản Trị Viên;5.0;ok
+Quản Trị Viên;5.0;hay
+Quản Trị Viên;3.0;ko được
+Quản Trị Viên;5.0;hay
