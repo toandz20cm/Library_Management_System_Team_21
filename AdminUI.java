@@ -33,6 +33,7 @@ public class AdminUI extends JFrame {
   private Color primaryColor = new Color(41, 128, 185);
   private Color secondaryColor = new Color(52, 152, 219);
   private Color accentColor = new Color(236, 240, 241);
+  private JProgressBar progressBar;
 
   public AdminUI(Library library) {
     this.library = library;
@@ -398,39 +399,108 @@ public class AdminUI extends JFrame {
       mainPanel.setBackground(Color.WHITE);
 
       // Panel chứa ô tìm kiếm và combo box
-      JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      JPanel searchPanel = new JPanel();
+      searchPanel.setLayout(new GridBagLayout());
       searchPanel.setBackground(Color.WHITE);
+      GridBagConstraints gbc = new GridBagConstraints();
+      gbc.insets = new Insets(5, 10, 5, 10); // Khoảng cách giữa các thành phần
 
+      // Ô nhập từ khóa
       JTextField keywordField = new JTextField(20);
-      JComboBox<String> searchTypeComboBox = new JComboBox<>(new String[]{"Title", "ISBN", "Genre", "Author", "Year"});
-      JButton searchButton = new JButton("Search");
+      gbc.gridx = 0;
+      gbc.gridy = 0;
+      gbc.gridwidth = 1;
+      searchPanel.add(new JLabel("Keyword:"), gbc);
+      gbc.gridx = 1;
+      searchPanel.add(keywordField, gbc);
 
-      searchPanel.add(new JLabel("Keyword:"));
-      searchPanel.add(keywordField);
-      searchPanel.add(new JLabel("Search by:"));
-      searchPanel.add(searchTypeComboBox);
-      searchPanel.add(searchButton);
+      // ComboBox chọn kiểu tìm kiếm
+      JComboBox<String> searchTypeComboBox = new JComboBox<>(new String[]{"Title", "ISBN", "Genre", "Author", "Year"});
+      gbc.gridx = 0;
+      gbc.gridy = 1;
+      gbc.gridwidth = 1;
+      searchPanel.add(new JLabel("Search by:"), gbc);
+      gbc.gridx = 1;
+      searchPanel.add(searchTypeComboBox, gbc);
+
+      // Nút tìm kiếm
+      JButton searchButton = new JButton("Search");
+      searchButton.setPreferredSize(new Dimension(120, 35));
+      searchButton.setBackground(new Color(41, 128, 185));
+      searchButton.setForeground(Color.WHITE);
+      searchButton.setFont(new Font("Roboto", Font.BOLD, 14));
+      gbc.gridx = 1;
+      gbc.gridy = 2;
+      searchPanel.add(searchButton, gbc);
 
       // Panel chứa bảng kết quả
       JPanel resultPanel = new JPanel(new BorderLayout());
       resultPanel.setBackground(Color.WHITE);
 
       // Bảng kết quả (khởi tạo rỗng)
-      String[] columnNames = {"Title", "Author", "Year", "Genre", "ISBN", "Add"};
+      String[] columnNames = {"Title", "Author", "Year", "Genre", "ISBN", ""};
       DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
           return column == 5; // Chỉ cho phép chỉnh sửa ở cột "Add"
         }
       };
-      JTable table = new JTable(tableModel);
-      table.setRowHeight(30);
+
+      // Tạo bảng kết quả
+      JTable table = new JTable(tableModel) {
+        @Override
+        public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+          Component c = super.prepareRenderer(renderer, row, column);
+
+          // Chỉ áp dụng hiệu ứng zebra cho các cột khác nút
+          if (column != 5) { // Cột "Add" có chỉ số 5
+            if (!isRowSelected(row)) {
+              c.setBackground(row % 2 == 0 ? new Color(245, 247, 250) : Color.WHITE);
+              c.setForeground(new Color(50, 50, 50));
+            } else {
+              c.setBackground(new Color(52, 152, 219));
+              c.setForeground(Color.WHITE);
+            }
+          }
+
+          return c;
+        }
+      };
+      table.setRowHeight(35);
+      table.setFont(new Font("Roboto", Font.PLAIN, 14));
+      table.setForeground(new Color(50, 50, 50));
+      table.setBackground(Color.WHITE);
+      table.setGridColor(new Color(200, 200, 200));
+      table.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 14));
+      table.getTableHeader().setBackground(new Color(41, 128, 185));
+      table.getTableHeader().setForeground(Color.WHITE);
+
+      table.getColumnModel().getColumn(0).setPreferredWidth(250); // Title
+      table.getColumnModel().getColumn(1).setPreferredWidth(100); // Author
+      table.getColumnModel().getColumn(2).setPreferredWidth(30);  // Year
+      table.getColumnModel().getColumn(3).setPreferredWidth(80); // Genre
+      table.getColumnModel().getColumn(4).setPreferredWidth(120); // ISBN
+      table.getColumnModel().getColumn(5).setPreferredWidth(30);  // Add
+
+      // Làm mới bảng sau khi thêm dữ liệu
+      table.repaint();
+      table.revalidate();
+
+      // Thêm thanh tiến trình (JProgressBar)
+      JProgressBar progressBar = new JProgressBar();
+      progressBar.setIndeterminate(true); // Hiệu ứng chạy liên tục
+      progressBar.setVisible(false);     // Ẩn khi không sử dụng
+      progressBar.setPreferredSize(new Dimension(400, 20));
+      progressBar.setForeground(new Color(41, 128, 185));
+      resultPanel.add(progressBar, BorderLayout.SOUTH); // Đặt thanh tiến trình dưới bảng
+
+      //Thêm thanh cuộn
       JScrollPane scrollPane = new JScrollPane(table);
       resultPanel.add(scrollPane, BorderLayout.CENTER);
 
       // Thêm renderer và editor cho cột "Add"
-      table.getColumn("Add").setCellRenderer(new ButtonRenderer());
-      table.getColumn("Add").setCellEditor(new ButtonEditor(new JCheckBox(), library, tableModel));
+      table.getColumn("").setCellRenderer(new ButtonRenderer());
+      table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), library, tableModel));
 
       // Thêm các panel vào mainPanel
       mainPanel.add(searchPanel, BorderLayout.NORTH);
@@ -453,7 +523,7 @@ public class AdminUI extends JFrame {
           searchButton.setEnabled(false);
 
           // Thực hiện tìm kiếm
-          new FetchBooksTask(keyword, searchType, tableModel, searchButton).execute();
+          new FetchBooksTask(keyword, searchType, tableModel, searchButton, progressBar).execute();
         } else {
           JOptionPane.showMessageDialog(frame, "Please enter a keyword.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -646,16 +716,21 @@ public class AdminUI extends JFrame {
     private final String searchType;
     private final DefaultTableModel tableModel;
     private final JButton searchButton; // Tham chiếu nút "Search"
+    private final JProgressBar progressBar; // Tham chiếu đến JProgressBar
 
-    public FetchBooksTask(String keyword, String searchType, DefaultTableModel tableModel, JButton searchButton) {
+    public FetchBooksTask(String keyword, String searchType, DefaultTableModel tableModel, JButton searchButton, JProgressBar progressBar) {
       this.keyword = keyword;
       this.searchType = searchType;
       this.tableModel = tableModel;
       this.searchButton = searchButton;
+      this.progressBar = progressBar;
     }
 
     @Override
     protected List<Document> doInBackground() throws Exception {
+      // Hiển thị thanh tiến trình
+      SwingUtilities.invokeLater(() -> progressBar.setVisible(true));
+
       String query = switch (searchType) {
         case "Title" -> "intitle:";
         case "ISBN" -> "isbn:";
@@ -748,6 +823,9 @@ public class AdminUI extends JFrame {
     @Override
     protected void done() {
       try {
+
+        SwingUtilities.invokeLater(() -> progressBar.setVisible(false)); // Ẩn thanh tiến trình
+
         // Lấy kết quả từ doInBackground()
         List<Document> documents = get();
 
@@ -804,19 +882,23 @@ public class AdminUI extends JFrame {
 
   }
 
-  // Renderer cho nút "Add"
   class ButtonRenderer extends JButton implements TableCellRenderer {
     public ButtonRenderer() {
       setOpaque(true);
+      setFont(new Font("Roboto", Font.BOLD, 14));
+      setForeground(Color.WHITE);
+      setBackground(new Color(41, 128, 185));
+      setBorder(BorderFactory.createEmptyBorder());
+      setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     @Override
-    public Component getTableCellRendererComponent(
-        JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-      setText((value == null) ? "" : value.toString());
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+      setText(value == null ? "Add" : value.toString());
       return this;
     }
   }
+
 
   // Editor cho nút "Add"
   class ButtonEditor extends DefaultCellEditor {
@@ -834,8 +916,25 @@ public class AdminUI extends JFrame {
       button = new JButton();
       button.setOpaque(true);
 
-      // Dừng chỉnh sửa khi nhấn nút
-      button.addActionListener(e -> fireEditingStopped());
+      // Thêm hiệu ứng hover
+      button.addMouseListener(new java.awt.event.MouseAdapter() {
+        @Override
+        public void mouseEntered(java.awt.event.MouseEvent evt) {
+          button.setBackground(new Color(52, 152, 219)); // Màu nền khi hover
+        }
+
+        @Override
+        public void mouseExited(java.awt.event.MouseEvent evt) {
+          button.setBackground(new Color(41, 128, 185)); // Màu nền mặc định
+        }
+      });
+
+      // Thêm hiệu ứng bấm
+      button.addActionListener(e -> {
+        button.setBackground(new Color(31, 97, 141)); // Màu nền khi bấm
+        fireEditingStopped(); // Dừng chỉnh sửa
+        SwingUtilities.invokeLater(() -> button.setBackground(new Color(41, 128, 185))); // Trả lại màu mặc định
+      });
     }
 
     @Override

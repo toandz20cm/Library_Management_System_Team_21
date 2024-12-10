@@ -73,10 +73,12 @@ public class DocumentDetailsUI extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     gbc.insets = new Insets(5, 5, 5, 15);
 
-    // Document title header
     JLabel titleHeader = new JLabel(document.getTitle());
     titleHeader.setFont(TITLE_FONT);
     titleHeader.setForeground(PRIMARY_COLOR);
+    titleHeader.setPreferredSize(new Dimension(250, 40)); // Đảm bảo không gian đủ rộng
+    titleHeader.setMaximumSize(new Dimension(250, 40)); // Giới hạn kích thước tối đa
+    titleHeader.setHorizontalAlignment(JLabel.LEFT); // Căn chỉnh văn bản
     gbc.gridwidth = 2;
     panel.add(titleHeader, gbc);
 

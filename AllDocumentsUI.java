@@ -40,7 +40,24 @@ public class AllDocumentsUI extends JFrame {
         "ISBN", "Năm phát hành", "Thể loại", ""
     };
     DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-    return new JTable(tableModel);
+    JTable table = new JTable(tableModel);
+
+    // Lấy TableColumnModel để thay đổi kích thước các cột
+    TableColumnModel columnModel = table.getColumnModel();
+
+    // Đặt kích thước cột ID (cột đầu tiên) là nhỏ nhất
+    columnModel.getColumn(0).setPreferredWidth(30); // Cột "ID"
+
+    // Đặt kích thước các cột còn lại
+    columnModel.getColumn(1).setPreferredWidth(200); // Cột "Tên tài liệu"
+    columnModel.getColumn(2).setPreferredWidth(100); // Cột "Tác giả"
+    columnModel.getColumn(3).setPreferredWidth(100); // Cột "Số lượng"
+    columnModel.getColumn(4).setPreferredWidth(100); // Cột "ISBN"
+    columnModel.getColumn(5).setPreferredWidth(100); // Cột "Năm phát hành"
+    columnModel.getColumn(6).setPreferredWidth(100); // Cột "Thể loại"
+    columnModel.getColumn(7).setPreferredWidth(100); // Cột "Chi tiết"
+
+    return table;
   }
 
   private void setupTableAppearance() {
