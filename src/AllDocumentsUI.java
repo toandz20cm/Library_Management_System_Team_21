@@ -7,22 +7,22 @@ public class AllDocumentsUI extends JFrame {
     private static final String TITLE = "Library - Tài liệu";
     private static final int WINDOW_WIDTH = 900;
     private static final int WINDOW_HEIGHT = 600;
-    private static final Color HEADER_COLOR = new Color(0x4CAF50);
-    private static final Color SELECTION_COLOR = new Color(0xA5D6A7);
-    private static final Color ALTERNATE_ROW_COLOR = new Color(0xF1F8E9);
-    
+    private static final Color HEADER_COLOR = new Color(0x0277BD);
+    private static final Color SELECTION_COLOR = new Color(0xB3E5FC);
+    private static final Color ALTERNATE_ROW_COLOR = new Color(0xE0F7FA); 
+
     private final JTable documentsTable;
     private final Library library;
 
     public AllDocumentsUI(Library library) {
         this.library = library;
         setupFrame();
-        
+
         documentsTable = createTable();
         setupTableAppearance();
         populateTableData();
         setupDetailButton();
-        
+
         add(new JScrollPane(documentsTable), BorderLayout.CENTER);
         setVisible(true);
     }
@@ -36,7 +36,7 @@ public class AllDocumentsUI extends JFrame {
 
     private JTable createTable() {
         String[] columnNames = {
-            "ID", "Tên tài liệu", "Tác giả", "Số lượng", 
+            "ID", "Tên tài liệu", "Tác giả", "Số lượng",
             "ISBN", "Năm phát hành", "Thể loại", ""
         };
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
@@ -75,7 +75,7 @@ public class AllDocumentsUI extends JFrame {
     private void populateTableData() {
         DefaultTableModel model = (DefaultTableModel) documentsTable.getModel();
         List<Document> documents = library.getDocuments();
-        
+
         for (Document doc : documents) {
             Object[] rowData = {
                 doc.getId(),

@@ -19,7 +19,7 @@ public class User implements Serializable {
      * @param phoneNumber the phone number of the user
      */
     public User(final String username, final String password, final String displayName,
-                final String birthDate, final String phoneNumber) {
+        final String birthDate, final String phoneNumber) {
         this.username = username;
         this.password = password;
         this.displayName = displayName;
@@ -74,6 +74,9 @@ public class User implements Serializable {
         return borrowedDocuments;
     }
 
+    public void setBorrowedDocuments(List<Document> borrowedDocuments) {
+        this.borrowedDocuments = borrowedDocuments;
+    }
     // Functional methods
 
     /**
@@ -97,8 +100,9 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "Username: " + username +
-               ", Display Name: " + displayName +
-               ", Birth Date: " + birthDate +
-               ", Phone Number: " + phoneNumber;
+            ", Display Name: " + displayName +
+            ", Birth Date: " + birthDate +
+            ", Phone Number: " + phoneNumber;
     }
+
 }

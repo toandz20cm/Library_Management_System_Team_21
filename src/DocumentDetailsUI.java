@@ -5,45 +5,43 @@ import java.awt.event.*;
 import java.util.List;
 
 public class DocumentDetailsUI extends JFrame {
-    private static final Color PRIMARY_COLOR = new Color(63, 81, 181);
-    private static final Color SECONDARY_COLOR = new Color(121, 134, 203);
-    private static final Color BACKGROUND_COLOR = new Color(237, 241, 245);
-    private static final Color CARD_COLOR = new Color(255, 255, 255);
-    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 16);
+    private static final Color PRIMARY_COLOR = new Color(33, 150, 243); // Xanh dương chính
+    private static final Color SECONDARY_COLOR = new Color(30, 136, 229); // Xanh đậm hơn
+    private static final Color BACKGROUND_COLOR = new Color(236, 239, 241); // Nền xám nhạt
+    private static final Color CARD_COLOR = Color.WHITE; // Màu trắng cho thẻ
+    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 18);
     private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font CONTENT_FONT = new Font("Segoe UI", Font.PLAIN, 14);
     private static final int PADDING = 20;
-    
+
     private final Document document;
     private final Library library;
     private final JPanel reviewsPanel;
 
+    private int selectedRating = 0;
+
     public DocumentDetailsUI(Document document, Library library) {
         this.document = document;
         this.library = library;
-        
+
         setupFrame();
-        
-        // Main container with shadow border
+
         JPanel mainContainer = new JPanel(new BorderLayout(0, PADDING));
         mainContainer.setBorder(new EmptyBorder(PADDING, PADDING, PADDING, PADDING));
         mainContainer.setBackground(BACKGROUND_COLOR);
-        
-        // Document details panel
+
         JPanel detailsCard = createDetailsPanel();
         mainContainer.add(detailsCard, BorderLayout.NORTH);
-        
-        // Reviews panel
+
         reviewsPanel = new JPanel();
         reviewsPanel.setLayout(new BoxLayout(reviewsPanel, BoxLayout.Y_AXIS));
         reviewsPanel.setBackground(CARD_COLOR);
         JScrollPane scrollPane = createReviewsScrollPane();
         mainContainer.add(scrollPane, BorderLayout.CENTER);
-        
-        // Rating input panel
+
         JPanel ratingCard = createRatingPanel();
         mainContainer.add(ratingCard, BorderLayout.SOUTH);
-        
+
         add(mainContainer);
         displayReviews();
         setVisible(true);
@@ -61,31 +59,29 @@ public class DocumentDetailsUI extends JFrame {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(CARD_COLOR);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            new SoftBevelBorder(SoftBevelBorder.RAISED),
+            new LineBorder(PRIMARY_COLOR, 2, true),
             new EmptyBorder(PADDING, PADDING, PADDING, PADDING)
         ));
-        
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 15);
-        
-        // Document title header
+
         JLabel titleHeader = new JLabel(document.getTitle());
         titleHeader.setFont(TITLE_FONT);
         titleHeader.setForeground(PRIMARY_COLOR);
         gbc.gridwidth = 2;
         panel.add(titleHeader, gbc);
-        
-        // Add details fields
+
         addDetailField(panel, "ID:", String.valueOf(document.getId()), ++gbc.gridy, gbc);
         addDetailField(panel, "Tác giả:", document.getAuthor(), ++gbc.gridy, gbc);
         addDetailField(panel, "Số lượng:", String.valueOf(document.getQuantity()), ++gbc.gridy, gbc);
         addDetailField(panel, "ISBN:", document.getIsbn(), ++gbc.gridy, gbc);
         addDetailField(panel, "Năm phát hành:", String.valueOf(document.getPublicationYear()), ++gbc.gridy, gbc);
         addDetailField(panel, "Thể loại:", document.getGenre(), ++gbc.gridy, gbc);
-        
+
         return panel;
     }
 
@@ -95,7 +91,7 @@ public class DocumentDetailsUI extends JFrame {
         JLabel labelComp = new JLabel(label);
         labelComp.setFont(HEADER_FONT);
         panel.add(labelComp, gbc);
-        
+
         gbc.gridx = 1;
         JLabel valueComp = new JLabel(value);
         valueComp.setFont(CONTENT_FONT);
@@ -116,42 +112,61 @@ public class DocumentDetailsUI extends JFrame {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(CARD_COLOR);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            new SoftBevelBorder(SoftBevelBorder.RAISED),
+            new LineBorder(PRIMARY_COLOR, 2, true),
             new EmptyBorder(PADDING, PADDING, PADDING, PADDING)
         ));
-        
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
-        
+
         JLabel ratingLabel = new JLabel("Đánh giá tài liệu:");
         ratingLabel.setFont(HEADER_FONT);
         panel.add(ratingLabel, gbc);
-        
-        JSlider ratingSlider = createStyledSlider();
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
-        panel.add(ratingSlider, gbc);
-        
+
+        JLabel[] stars = new JLabel[5];
+        for (int i = 0; i < stars.length; i++) {
+            ImageIcon emptyStar = new ImageIcon("image/Empty Star.png");
+            Image scaledEmptyStar = emptyStar.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+            stars[i] = new JLabel(new ImageIcon(scaledEmptyStar));
+            stars[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            final int index = i;
+            stars[i].addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    updateStars(stars, index + 1);
+                }
+            });
+
+            gbc.gridx = i + 1;
+            panel.add(stars[i], gbc);
+        }
+
         JButton submitButton = createStyledButton("Gửi đánh giá");
-        submitButton.addActionListener(e -> addReview(ratingSlider.getValue() / 2.0));
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
+        submitButton.addActionListener(e -> {
+            if (selectedRating > 0) {
+                addReview(selectedRating);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "Vui lòng chọn ít nhất 1 sao!",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        gbc.gridx = stars.length + 1;
         panel.add(submitButton, gbc);
-        
+
         return panel;
     }
 
-    private JSlider createStyledSlider() {
-        JSlider slider = new JSlider(0, 10, 5);
-        slider.setMajorTickSpacing(2);
-        slider.setMinorTickSpacing(1);
-        slider.setPaintTicks(true);
-        slider.setPaintLabels(true);
-        slider.setBackground(CARD_COLOR);
-        slider.setForeground(PRIMARY_COLOR);
-        return slider;
+    private void updateStars(JLabel[] stars, int rating) {
+        this.selectedRating = rating;
+        for (int i = 0; i < stars.length; i++) {
+            ImageIcon icon = new ImageIcon("image/" + (i < rating ? "Full Star.png" : "Empty Star.png"));
+            Image scaledIcon = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+            stars[i].setIcon(new ImageIcon(scaledIcon));
+        }
     }
 
     private JButton createStyledButton(String text) {
@@ -176,28 +191,30 @@ public class DocumentDetailsUI extends JFrame {
     private void displayReviews() {
         reviewsPanel.removeAll();
         List<Review> reviews = library.getReviewsForDocument(document.getId());
-        
+
         if (reviews.isEmpty()) {
             JLabel noReviewLabel = createStyledLabel("Chưa có đánh giá nào.", CONTENT_FONT);
             noReviewLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
             reviewsPanel.add(noReviewLabel);
         } else {
-            // Average rating
-            double averageRating = reviews.stream()
-                                        .mapToDouble(Review::getRating)
-                                        .average()
-                                        .orElse(0.0);
-            
-            JLabel avgLabel = createStyledLabel(
-                String.format("Đánh giá trung bình: %.1f/5★", averageRating),
-                HEADER_FONT
-            );
+            double averageRating = reviews.stream().mapToDouble(Review::getRating).average().orElse(0.0);
+
+            JPanel averagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+            averagePanel.setBackground(CARD_COLOR);
+            averagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            JLabel avgLabel = createStyledLabel(String.format("Đánh giá trung bình: %.1f/5", averageRating), HEADER_FONT);
             avgLabel.setForeground(PRIMARY_COLOR);
-            avgLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            reviewsPanel.add(avgLabel);
+            averagePanel.add(avgLabel);
+
+            ImageIcon fullStar = new ImageIcon("image/Full Star.png");
+            Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+            JLabel starLabel = new JLabel(new ImageIcon(scaledFullStar));
+            averagePanel.add(starLabel);
+
+            reviewsPanel.add(averagePanel);
             reviewsPanel.add(Box.createVerticalStrut(15));
-            
-            // Individual reviews
+
             for (Review review : reviews) {
                 JPanel reviewCard = createReviewCard(review);
                 reviewCard.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -205,7 +222,7 @@ public class DocumentDetailsUI extends JFrame {
                 reviewsPanel.add(Box.createVerticalStrut(10));
             }
         }
-        
+
         reviewsPanel.revalidate();
         reviewsPanel.repaint();
     }
@@ -213,24 +230,36 @@ public class DocumentDetailsUI extends JFrame {
     private JPanel createReviewCard(Review review) {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBackground(new Color(245, 245, 245));
+        card.setBackground(CARD_COLOR);
         card.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(new Color(230, 230, 230), 1, true),
+            new LineBorder(new Color(200, 200, 200), 1, true),
             new EmptyBorder(10, 10, 10, 10)
         ));
-        
-        JLabel ratingLabel = createStyledLabel(
-            String.format("%.1f/5★", review.getRating()),
-            HEADER_FONT
-        );
-        ratingLabel.setForeground(PRIMARY_COLOR);
-        
+
+        JLabel userLabel = createStyledLabel("Người đánh giá: " + review.getUsername(), CONTENT_FONT);
+        userLabel.setForeground(new Color(100, 100, 100));
+        userLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel starsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        starsPanel.setBackground(CARD_COLOR);
+        starsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        for (int i = 0; i < (int) review.getRating(); i++) {
+            ImageIcon fullStar = new ImageIcon("image/Full Star.png");
+            Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+            JLabel starLabel = new JLabel(new ImageIcon(scaledFullStar));
+            starsPanel.add(starLabel);
+        }
+
         JLabel commentLabel = createStyledLabel(review.getComment(), CONTENT_FONT);
-        
-        card.add(ratingLabel);
+        commentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        card.add(userLabel);
+        card.add(Box.createVerticalStrut(5));
+        card.add(starsPanel);
         card.add(Box.createVerticalStrut(5));
         card.add(commentLabel);
-        
+
         return card;
     }
 
@@ -241,13 +270,14 @@ public class DocumentDetailsUI extends JFrame {
     }
 
     private void addReview(double rating) {
-        String comment = JOptionPane.showInputDialog(this, 
+        String comment = JOptionPane.showInputDialog(this,
             "Nhập bình luận của bạn:",
             "Thêm đánh giá",
             JOptionPane.PLAIN_MESSAGE);
-            
+
         if (comment != null && !comment.trim().isEmpty()) {
-            Review newReview = new Review("người đánh giá", rating, comment.trim());
+            String currentUserDisplayName = library.getCurrentUserDisplayName();
+            Review newReview = new Review(currentUserDisplayName, rating, comment.trim());
             library.addReview(document.getId(), newReview);
             displayReviews();
         } else if (comment != null) {

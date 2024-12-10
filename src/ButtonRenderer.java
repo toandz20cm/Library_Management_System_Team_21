@@ -2,10 +2,11 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
+// Class để hiển thị nút bấm trên JTable
 class ButtonRenderer extends JButton implements TableCellRenderer {
-    private static final Color BUTTON_BACKGROUND = new Color(0x4CAF50);
-    private static final Color BUTTON_FOREGROUND = Color.WHITE;
-    
+    private static final Color BUTTON_BACKGROUND = new Color(0x2196F3); // Màu xanh lam
+    private static final Color BUTTON_FOREGROUND = Color.WHITE; // Màu trắng
+
     public ButtonRenderer() {
         setOpaque(true);
         setupButtonStyle();
@@ -17,25 +18,32 @@ class ButtonRenderer extends JButton implements TableCellRenderer {
         setFont(new Font("Segoe UI", Font.BOLD, 12));
         setBorderPainted(false);
         setFocusPainted(false);
+        setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     @Override
     public Component getTableCellRendererComponent(
-            JTable table, 
-            Object value, 
-            boolean isSelected, 
-            boolean hasFocus, 
-            int row, 
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
             int column) {
         setText(value != null ? value.toString() : "");
+        if (isSelected) {
+            setBackground(new Color(0x1976D2)); // Màu xanh lam đậm hơn khi được chọn
+        } else {
+            setBackground(BUTTON_BACKGROUND);
+        }
         return this;
     }
 }
 
+// Class để xử lý sự kiện khi nhấn nút trên JTable
 class ButtonEditor extends DefaultCellEditor {
-    private static final Color BUTTON_BACKGROUND = new Color(0x4CAF50);
-    private static final Color BUTTON_FOREGROUND = Color.WHITE;
-    
+    private static final Color BUTTON_BACKGROUND = new Color(0x2196F3); // Màu xanh lam
+    private static final Color BUTTON_FOREGROUND = Color.WHITE; // Màu trắng
+
     private final JButton button;
     private String label;
     private boolean isPushed;
@@ -46,7 +54,7 @@ class ButtonEditor extends DefaultCellEditor {
         super(checkBox);
         this.library = library;
         this.parent = parent;
-        
+
         button = createStyledButton();
         setupButtonListener();
     }
@@ -59,6 +67,7 @@ class ButtonEditor extends DefaultCellEditor {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
@@ -68,18 +77,18 @@ class ButtonEditor extends DefaultCellEditor {
 
     @Override
     public Component getTableCellEditorComponent(
-            JTable table, 
-            Object value, 
-            boolean isSelected, 
-            int row, 
+            JTable table,
+            Object value,
+            boolean isSelected,
+            int row,
             int column) {
-        
+
         label = value != null ? value.toString() : "";
         button.setText(label);
         isPushed = true;
 
         handleDocumentDetails(table, row);
-        
+
         return button;
     }
 
@@ -103,13 +112,13 @@ class ButtonEditor extends DefaultCellEditor {
     }
 
     private void showErrorMessage(String message) {
-        SwingUtilities.invokeLater(() -> 
-            JOptionPane.showMessageDialog(
-                parent,
-                message,
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE
-            )
+        SwingUtilities.invokeLater(() ->
+                JOptionPane.showMessageDialog(
+                        parent,
+                        message,
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE
+                )
         );
     }
 

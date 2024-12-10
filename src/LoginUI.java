@@ -8,39 +8,40 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import javax.swing.border.MatteBorder;
 
 class RoundedButton extends JButton {
-    public RoundedButton(String text) {
-        super(text);
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
-        setForeground(Color.WHITE);
-        setBackground(new Color(79, 121, 255));
-        setFont(new Font("Segoe UI", Font.BOLD, 14));
-        setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
+  public RoundedButton(String text) {
+    super(text);
+    setContentAreaFilled(false);
+    setFocusPainted(false);
+    setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
+    setForeground(Color.WHITE);
+    setBackground(new Color(79, 121, 255));
+    setFont(new Font("Segoe UI", Font.BOLD, 14));
+    setCursor(new Cursor(Cursor.HAND_CURSOR));
+  }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        // Gradient background
-        GradientPaint gradient = new GradientPaint(
-            0, 0, getBackground(),
-            getWidth(), getHeight(), getBackground().darker()
-        );
-        g2.setPaint(gradient);
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-        
-        // Draw slight shadow
-        g2.setColor(new Color(0, 0, 0, 50));
-        g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 15, 15);
-        
-        super.paintComponent(g);
-        g2.dispose();
-    }
+  @Override
+  protected void paintComponent(Graphics g) {
+    Graphics2D g2 = (Graphics2D) g.create();
+    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+    // Gradient background
+    GradientPaint gradient = new GradientPaint(
+        0, 0, getBackground(),
+        getWidth(), getHeight(), getBackground().darker()
+    );
+    g2.setPaint(gradient);
+    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
+
+    // Draw slight shadow
+    g2.setColor(new Color(0, 0, 0, 50));
+    g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 15, 15);
+
+    super.paintComponent(g);
+    g2.dispose();
+  }
 }
 
 public class LoginUI extends JFrame {
@@ -135,6 +136,7 @@ public class LoginUI extends JFrame {
         if (validateCredentials(username, password)) {
           User user = library.authenticateUser(username, password);
           if (user != null) {
+            library.setCurrentUser(user); // Lưu trạng thái đăng nhập
             new UserUI(library, user).setVisible(true);
             dispose();
           } else {
@@ -147,55 +149,58 @@ public class LoginUI extends JFrame {
     registerButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        // Mở hộp thoại để nhập tất cả thông tin đăng ký
-        JTextField usernameField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-        JTextField displayNameField = new JTextField();
-        JTextField birthDateField = new JTextField();
-        JTextField phoneNumberField = new JTextField();
+        // Tạo panel nhập liệu hiện đại
+        JPanel panel = createModernInputPanel();
+        JTextField usernameField = new JTextField(20);
+        JPasswordField passwordField = new JPasswordField(20);
+        JTextField displayNameField = new JTextField(20);
+        JTextField birthDateField = new JTextField(20);
+        JTextField phoneNumberField = new JTextField(20);
 
-        Object[] message = {
-            "Username: (ít nhất 6 ký tự)", usernameField,
-            "Password: (ít nhất 6 ký tự)", passwordField,
-            "Tên hiển thị:", displayNameField,
-            "Ngày sinh (dd/MM/yyyy):", birthDateField,
-            "Số điện thoại: (chỉ chứa số và 10 chữ số)", phoneNumberField,
-        };
+        // Thêm các trường vào panel
+        addInputField(panel, "Username (ít nhất 6 ký tự):", usernameField);
+        addInputField(panel, "Password (ít nhất 6 ký tự):", passwordField);
+        addInputField(panel, "Tên hiển thị:", displayNameField);
+        addInputField(panel, "Ngày sinh (dd/MM/yyyy):", birthDateField);
+        addInputField(panel, "Số điện thoại (10 chữ số):", phoneNumberField);
 
-        int option = JOptionPane.showConfirmDialog(null, message, "Đăng ký tài khoản mới", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
+        // Hiển thị hộp thoại đăng ký hiện đại
+        int result = showModernDialog(panel, "Đăng ký tài khoản mới");
+
+        if (result == JOptionPane.OK_OPTION) {
+          // Lấy dữ liệu từ các trường nhập liệu
           String username = usernameField.getText();
           String password = new String(passwordField.getPassword());
           String displayName = displayNameField.getText();
           String birthDate = birthDateField.getText();
           String phoneNumber = phoneNumberField.getText();
 
-          // Kiểm tra độ dài của username và password
+          // Kiểm tra độ dài username và password
           if (username.length() < 6 || password.length() < 6) {
-            JOptionPane.showMessageDialog(LoginUI.this, "Tên đăng nhập và mật khẩu phải có ít nhất 6 ký tự!");
+            showErrorMessage("Tên đăng nhập và mật khẩu phải có ít nhất 6 ký tự!");
             return;
           }
 
-          // Kiểm tra tính hợp lệ của ngày sinh và số điện thoại
+          // Kiểm tra ngày sinh và số điện thoại hợp lệ
           if (!isValidBirthDate(birthDate)) {
-            JOptionPane.showMessageDialog(LoginUI.this, "Ngày sinh không hợp lệ! Vui lòng nhập đúng định dạng dd/MM/yyyy.");
+            showErrorMessage("Ngày sinh không hợp lệ! Vui lòng nhập đúng định dạng dd/MM/yyyy.");
             return;
           }
           if (!isValidPhoneNumber(phoneNumber)) {
-            JOptionPane.showMessageDialog(LoginUI.this, "Số điện thoại không hợp lệ!");
+            showErrorMessage("Số điện thoại không hợp lệ! Vui lòng nhập số có 10 chữ số.");
             return;
           }
 
-          // Kiểm tra xem tài khoản đã tồn tại chưa
+          // Kiểm tra tài khoản đã tồn tại hay chưa
           if (library.authenticateUser(username, password) == null) {
             User newUser = new User(username, password, displayName, birthDate, phoneNumber);
             library.addUser(newUser);
-            JOptionPane.showMessageDialog(LoginUI.this, "Đăng ký thành công!");
+            showSuccessMessage("Đăng ký thành công!");
           } else {
-            JOptionPane.showMessageDialog(LoginUI.this, "Tài khoản đã tồn tại!");
+            showErrorMessage("Tài khoản đã tồn tại!");
           }
         } else {
-          JOptionPane.showMessageDialog(LoginUI.this, "Hủy đăng ký!");
+          showErrorMessage("Hủy đăng ký!");
         }
       }
     });
@@ -206,6 +211,7 @@ public class LoginUI extends JFrame {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
         if (username.equals("admin") && password.equals("1")) {
+          library.setCurrentUser(null); // lưu trạng thái đăng nhập của Admin
           new AdminUI(library).setVisible(true);
           dispose();
         } else {
@@ -227,34 +233,34 @@ public class LoginUI extends JFrame {
 
     // Focus listener giữ nguyên với màu sắc mới
     field.addFocusListener(new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (field.getText().equals(placeholder)) {
-                field.setText("");
-            }
-            field.setForeground(new Color(50, 50, 50));
-            field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(79, 121, 255), 2, true),
-                BorderFactory.createEmptyBorder(10, 15, 10, 15)
-            ));
+      @Override
+      public void focusGained(FocusEvent e) {
+        if (field.getText().equals(placeholder)) {
+          field.setText("");
         }
+        field.setForeground(new Color(50, 50, 50));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(79, 121, 255), 2, true),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+      }
 
-        @Override
-        public void focusLost(FocusEvent e) {
-            if (field.getText().isEmpty()) {
-                field.setText(placeholder);
-                field.setForeground(new Color(120, 120, 120));
-                field.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
-                ));
-            }
+      @Override
+      public void focusLost(FocusEvent e) {
+        if (field.getText().isEmpty()) {
+          field.setText(placeholder);
+          field.setForeground(new Color(120, 120, 120));
+          field.setBorder(BorderFactory.createCompoundBorder(
+              BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+              BorderFactory.createEmptyBorder(10, 15, 10, 15)
+          ));
         }
+      }
     });
     return field;
-}
+  }
 
-private JPasswordField createStyledPasswordField(String placeholder) {
+  private JPasswordField createStyledPasswordField(String placeholder) {
     JPasswordField field = new JPasswordField(20);
     field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
     field.setForeground(new Color(120, 120, 120));
@@ -268,51 +274,51 @@ private JPasswordField createStyledPasswordField(String placeholder) {
 
     // Focus listener với màu sắc mới
     field.addFocusListener(new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (new String(field.getPassword()).equals(placeholder)) {
-                field.setText("");
-                field.setEchoChar('•');
-            }
-            field.setForeground(new Color(50, 50, 50));
-            field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(79, 121, 255), 2, true),
-                BorderFactory.createEmptyBorder(10, 15, 10, 15)
-            ));
+      @Override
+      public void focusGained(FocusEvent e) {
+        if (new String(field.getPassword()).equals(placeholder)) {
+          field.setText("");
+          field.setEchoChar('•');
         }
+        field.setForeground(new Color(50, 50, 50));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(79, 121, 255), 2, true),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+      }
 
-        @Override
-        public void focusLost(FocusEvent e) {
-            if (field.getPassword().length == 0) {
-                field.setText(placeholder);
-                field.setEchoChar((char) 0);
-                field.setForeground(new Color(120, 120, 120));
-                field.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
-                ));
-            }
+      @Override
+      public void focusLost(FocusEvent e) {
+        if (field.getPassword().length == 0) {
+          field.setText(placeholder);
+          field.setEchoChar((char) 0);
+          field.setForeground(new Color(120, 120, 120));
+          field.setBorder(BorderFactory.createCompoundBorder(
+              BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+              BorderFactory.createEmptyBorder(10, 15, 10, 15)
+          ));
         }
+      }
     });
     return field;
-}
+  }
 
   private RoundedButton createStyledButton(String text, Color baseColor) {
     RoundedButton button = new RoundedButton(text);
     button.setBackground(baseColor);
     button.setForeground(Color.WHITE);
     button.addMouseListener(new MouseAdapter() {
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            button.setBackground(baseColor.darker());
-        }
-        @Override
-        public void mouseExited(MouseEvent e) {
-            button.setBackground(baseColor);
-        }
+      @Override
+      public void mouseEntered(MouseEvent e) {
+        button.setBackground(baseColor.darker());
+      }
+      @Override
+      public void mouseExited(MouseEvent e) {
+        button.setBackground(baseColor);
+      }
     });
     return button;
-    }
+  }
 
 
   private boolean isValidBirthDate(String birthDate) {
@@ -342,5 +348,117 @@ private JPasswordField createStyledPasswordField(String placeholder) {
   public static void main(String[] args) {
     Library library = new Library();
     new LoginUI(library).setVisible(true);
+  }
+
+  private void addInputField(JPanel panel, String label, JTextField field) {
+    JPanel fieldPanel = new JPanel(new BorderLayout(10, 5));
+    fieldPanel.setBackground(Color.WHITE);
+
+    // Style cho label
+    JLabel labelComponent = new JLabel(label);
+    labelComponent.setFont(new Font("Roboto", Font.PLAIN, 13));
+    labelComponent.setForeground(new Color(100, 100, 100));
+
+    // Style cho text field
+    field.setFont(new Font("Roboto", Font.PLAIN, 14));
+    field.setPreferredSize(new Dimension(250, 35));
+    field.setBackground(new Color(247, 248, 250));
+    field.setForeground(new Color(50, 50, 50));
+    field.setCaretColor(new Color(41, 128, 185));
+    field.setOpaque(true);
+
+    // Custom border với màu nhạt ở dưới
+    field.setBorder(BorderFactory.createCompoundBorder(
+        new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
+        BorderFactory.createEmptyBorder(5, 10, 5, 10)
+    ));
+
+    // Thêm hiệu ứng hover và focus
+    field.addFocusListener(new java.awt.event.FocusAdapter() {
+      @Override
+      public void focusGained(java.awt.event.FocusEvent evt) {
+        field.setBackground(new Color(242, 243, 245));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            new MatteBorder(0, 0, 2, 0, new Color(41, 128, 185)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+      }
+
+      @Override
+      public void focusLost(java.awt.event.FocusEvent evt) {
+        field.setBackground(new Color(247, 248, 250));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            new MatteBorder(0, 0, 2, 0, new Color(225, 225, 225)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+      }
+    });
+
+    fieldPanel.add(labelComponent, BorderLayout.NORTH);
+    fieldPanel.add(field, BorderLayout.CENTER);
+    fieldPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 15, 0));
+
+    panel.add(fieldPanel);
+  }
+
+  // Cập nhật lại createModernInputPanel() để có padding tốt hơn
+  private JPanel createModernInputPanel() {
+    JPanel panel = new JPanel();
+    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    panel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
+    panel.setBackground(Color.WHITE);
+
+    // Thêm tiêu đề cho panel
+    JLabel titleLabel = new JLabel("Enter Information");
+    titleLabel.setFont(new Font("Roboto", Font.BOLD, 18));
+    titleLabel.setForeground(new Color(50, 50, 50));
+    titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+    panel.add(titleLabel);
+
+    return panel;
+  }
+
+  // Cập nhật showModernDialog() để dialog đẹp hơn
+  private int showModernDialog(JPanel panel, String title) {
+    UIManager.put("OptionPane.background", Color.WHITE);
+    UIManager.put("Panel.background", Color.WHITE);
+    UIManager.put("OptionPane.buttonFont", new Font("Roboto", Font.PLAIN, 13));
+    UIManager.put("OptionPane.messageFont", new Font("Roboto", Font.PLAIN, 13));
+
+    JOptionPane optionPane = new JOptionPane(
+        panel,
+        JOptionPane.PLAIN_MESSAGE,
+        JOptionPane.OK_CANCEL_OPTION
+    );
+
+    // Tạo custom dialog
+    JDialog dialog = optionPane.createDialog(this, title);
+    dialog.setBackground(Color.WHITE);
+
+    // Set size phù hợp
+    dialog.setSize(400, dialog.getHeight());
+    dialog.setLocationRelativeTo(this);
+
+    dialog.setVisible(true);
+
+    Object selectedValue = optionPane.getValue();
+    if (selectedValue == null)
+      return JOptionPane.CLOSED_OPTION;
+    return ((Integer)selectedValue).intValue();
+  }
+
+  private void showSuccessMessage(String message) {
+    JOptionPane.showMessageDialog(
+        this, message, "Success",
+        JOptionPane.INFORMATION_MESSAGE
+    );
+  }
+
+  private void showErrorMessage(String message) {
+    JOptionPane.showMessageDialog(
+        this, message, "Error",
+        JOptionPane.ERROR_MESSAGE
+    );
   }
 }
