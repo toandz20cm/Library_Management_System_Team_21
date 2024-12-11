@@ -391,7 +391,7 @@ public class AdminUI extends JFrame {
     });
 
     // Other existing action listeners
-    viewAllDocumentsButton.addActionListener(e -> new AllDocumentsUI(library).setVisible(true));
+    viewAllDocumentsButton.addActionListener(e -> new AllDocumentsUI(library,null).setVisible(true));
 
     addDocumentByGoogleBooksAPIButton.addActionListener(e -> {
       // Panel chính chứa các tùy chọn

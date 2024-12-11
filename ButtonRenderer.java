@@ -99,7 +99,12 @@ class ButtonEditor extends DefaultCellEditor {
   }
 
   private void openDocumentDetails(Document document) {
-    SwingUtilities.invokeLater(() -> new DocumentDetailsUI(document, library));
+    SwingUtilities.invokeLater(() -> {
+      if (parent instanceof AllDocumentsUI allDocumentsUI) { // Ép kiểu parent
+        UserUI userUI = allDocumentsUI.getUserUI(); // Lấy UserUI từ AllDocumentsUI
+        new DocumentDetailsUI(document, library, userUI, allDocumentsUI);
+      }
+    });
   }
 
   private void showErrorMessage(String message) {

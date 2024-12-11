@@ -153,11 +153,12 @@ public class UserUI extends JFrame {
         "Trả Tài Liệu",
         "Xem Tài Liệu",
         "Đăng Xuất",
-        "Đổi Mật Khẩu"
+        "Đổi Mật Khẩu",
+        "Reload"
     };
 
     String[] buttonIcons = {
-        "👤    ", "📚      ", "↩️", "🔍     ", "🚪     ","🛠️      ",
+        "👤    ", "📚      ", "↩️", "🔍     ", "🚪     ","🛠️      "," "
     };
 
     actionButtons = new JButton[buttonTexts.length];
@@ -426,7 +427,7 @@ public class UserUI extends JFrame {
 
     // Xem tài liệu
     actionButtons[3].addActionListener(e ->
-        new AllDocumentsUI(library).setVisible(true)
+        new AllDocumentsUI(library, this).setVisible(true) // Truyền UserUI
     );
 
     // Đăng xuất
@@ -476,6 +477,10 @@ public class UserUI extends JFrame {
       }
     });
 
+    // Reload
+    actionButtons[6].addActionListener(e -> {
+      populateBorrowedDocumentsTable();
+    });
 
   }
 
@@ -709,4 +714,7 @@ public class UserUI extends JFrame {
     return phoneNumber.matches("\\d{10}");
   }
 
+  public void reload() {
+    populateBorrowedDocumentsTable(); // Tải lại danh sách tài liệu đã mượn
+  }
 }

@@ -13,10 +13,14 @@ public class AllDocumentsUI extends JFrame {
 
   private final JTable documentsTable;
   private final Library library;
+  private final UserUI userUI;
 
-  public AllDocumentsUI(Library library) {
+  public AllDocumentsUI(Library library, UserUI userUI) {
     this.library = library;
+    this.userUI = userUI;
+
     setupFrame();
+    addReloadButton(); // Thêm nút reload
 
     documentsTable = createTable();
     setupTableAppearance();
@@ -92,8 +96,12 @@ public class AllDocumentsUI extends JFrame {
 
   private void populateTableData() {
     DefaultTableModel model = (DefaultTableModel) documentsTable.getModel();
+    model.setRowCount(0); // xóa dữ liệu cũ
+
+    //Load dữ liệu từ file
     List<Document> documents = library.getDocuments();
 
+    //Thêm dữ liệu vào bảng
     for (Document doc : documents) {
       Object[] rowData = {
           doc.getId(),
@@ -112,6 +120,26 @@ public class AllDocumentsUI extends JFrame {
   private void setupDetailButton() {
     TableColumn detailColumn = documentsTable.getColumn("");
     detailColumn.setCellRenderer(new ButtonRenderer());
-    detailColumn.setCellEditor(new ButtonEditor(new JCheckBox(), library, this));
+    detailColumn.setCellEditor(new ButtonEditor(new JCheckBox(), library, this)); // Truyền this làm parent
   }
+
+  private void addReloadButton() {
+    JButton reloadButton = new JButton("Reload");
+    reloadButton.setFont(new Font("Roboto", Font.PLAIN, 14));
+    reloadButton.setBackground(new Color(0x4CAF50));
+    reloadButton.setForeground(Color.WHITE);
+    reloadButton.setFocusPainted(false);
+    reloadButton.addActionListener(e -> populateTableData()); // Gọi lại phương thức load dữ liệu
+    add(reloadButton, BorderLayout.SOUTH); // Thêm nút vào cuối giao diện
+  }
+
+  // Getter để ButtonEditor lấy UserUI
+  public UserUI getUserUI() {
+    return userUI;
+  }
+
+  public void reload() {
+    populateTableData(); // Tải lại danh sách tài liệu
+  }
+
 }

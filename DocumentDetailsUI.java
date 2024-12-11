@@ -1,3 +1,6 @@
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -17,12 +20,16 @@ public class DocumentDetailsUI extends JFrame {
   private final Document document;
   private final Library library;
   private final JPanel reviewsPanel;
+  private final UserUI userUI;
+  private final AllDocumentsUI allDocumentsUI;
 
   private int selectedRating = 0; // Lưu số sao được chọn
 
-  public DocumentDetailsUI(Document document, Library library) {
+  public DocumentDetailsUI(Document document, Library library, UserUI userUI, AllDocumentsUI allDocumentsUI) {
     this.document = document;
     this.library = library;
+    this.userUI = userUI;
+    this.allDocumentsUI = allDocumentsUI;
 
     setupFrame();
 
@@ -82,13 +89,68 @@ public class DocumentDetailsUI extends JFrame {
     gbc.gridwidth = 2;
     panel.add(titleHeader, gbc);
 
-    // Add details fields
+    // Chi tiết tài liệu
     addDetailField(panel, "ID:", String.valueOf(document.getId()), ++gbc.gridy, gbc);
     addDetailField(panel, "Tác giả:", document.getAuthor(), ++gbc.gridy, gbc);
     addDetailField(panel, "Số lượng:", String.valueOf(document.getQuantity()), ++gbc.gridy, gbc);
     addDetailField(panel, "ISBN:", document.getIsbn(), ++gbc.gridy, gbc);
     addDetailField(panel, "Năm phát hành:", String.valueOf(document.getPublicationYear()), ++gbc.gridy, gbc);
     addDetailField(panel, "Thể loại:", document.getGenre(), ++gbc.gridy, gbc);
+
+    // Nút mượn tài liệu
+    JButton borrowButton = new JButton("Mượn Tài Liệu");
+    borrowButton.setFont(CONTENT_FONT);
+    borrowButton.setBackground(PRIMARY_COLOR);
+    borrowButton.setForeground(Color.WHITE);
+    borrowButton.setFocusPainted(false);
+    borrowButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+    // Vô hiệu hóa nút nếu người dùng hiện tại là admin
+    borrowButton.setEnabled(library.getCurrentUser() != null);
+
+    borrowButton.addActionListener(e -> {
+      if (document.getQuantity() > 0) {
+        User currentUser = library.getCurrentUser();
+        if (currentUser != null) {
+          // Thêm tài liệu vào danh sách tài liệu đã mượn
+          currentUser.getBorrowedDocuments().add(document);
+          document.setQuantity(document.getQuantity() - 1);
+
+          // Lưu dữ liệu vào file
+          saveLibraryToFile();
+          saveBorrowedDocumentsToFile(currentUser);
+
+          JOptionPane.showMessageDialog(
+              this,
+              "Mượn tài liệu thành công!",
+              "Thành công",
+              JOptionPane.INFORMATION_MESSAGE
+          );
+
+          // Gọi phương thức reload trên UserUI và AllDocumentsUI
+          if (userUI != null) userUI.reload();
+          if (allDocumentsUI != null) allDocumentsUI.reload();
+
+          // Cập nhật lại giao diện
+          displayReviews();
+
+          dispose(); // Đóng cửa sổ DocumentDetailsUI
+        }
+      } else {
+        JOptionPane.showMessageDialog(
+            this,
+            "Tài liệu không còn sẵn có!",
+            "Thông báo",
+            JOptionPane.WARNING_MESSAGE
+        );
+      }
+    });
+
+    // Thêm nút vào panel
+    gbc.gridy++;
+    gbc.gridwidth = 2;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    panel.add(borrowButton, gbc);
 
     return panel;
   }
@@ -318,5 +380,26 @@ public class DocumentDetailsUI extends JFrame {
           JOptionPane.ERROR_MESSAGE);
     }
   }
+  // Lưu danh sách tài liệu vào file "documents.txt"
+  private void saveLibraryToFile() {
+    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("documents.txt"))) {
+      oos.writeObject(library.getDocuments()); // Lưu danh sách tài liệu
+      System.out.println("Lưu danh sách tài liệu thành công.");
+    } catch (IOException e) {
+      e.printStackTrace();
+      JOptionPane.showMessageDialog(this, "Lỗi khi lưu danh sách tài liệu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
+  }
 
+  // Lưu danh sách tài liệu đã mượn của người dùng vào file "username_borrowed.txt"
+  private void saveBorrowedDocumentsToFile(User user) {
+    String fileName = user.getUsername() + "_borrowed.txt";
+    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
+      oos.writeObject(user.getBorrowedDocuments());
+      System.out.println("Lưu danh sách tài liệu đã mượn thành công.");
+    } catch (IOException e) {
+      e.printStackTrace();
+      JOptionPane.showMessageDialog(this, "Lỗi khi lưu danh sách tài liệu đã mượn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
+  }
 }
