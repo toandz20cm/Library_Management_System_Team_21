@@ -157,7 +157,7 @@ public class UserUI extends JFrame {
     };
 
     String[] buttonIcons = {
-        "👤    ", "📚      ", "↩️", "🔍     ", "🚪     ","      ",
+        "👤    ", "📚      ", "↩️", "🔍     ", "🚪     ","🛠️      ",
     };
 
     actionButtons = new JButton[buttonTexts.length];
@@ -453,11 +453,19 @@ public class UserUI extends JFrame {
         String newPassword = new String(newPasswordField.getPassword());
         String confirmPassword = new String(confirmPasswordField.getPassword());
 
+        // Kiểm tra mật khẩu xác nhận có khớp không
         if (!newPassword.equals(confirmPassword)) {
           showErrorMessage("Mật khẩu xác nhận không khớp!");
           return;
         }
 
+        // Kiểm tra độ dài mật khẩu mới
+        if (newPassword.length() < 6) {
+          showErrorMessage("Mật khẩu mới phải có ít nhất 6 ký tự!");
+          return;
+        }
+
+        // Kiểm tra mật khẩu cũ có chính xác không
         if (oldPassword.equals(user.getPassword())) {
           user.setPassword(newPassword);
           updateUserPasswordInFile(user);
@@ -467,6 +475,7 @@ public class UserUI extends JFrame {
         }
       }
     });
+
 
   }
 
