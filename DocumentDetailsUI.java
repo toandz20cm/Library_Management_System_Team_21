@@ -25,7 +25,8 @@ public class DocumentDetailsUI extends JFrame {
 
   private int selectedRating = 0; // Lưu số sao được chọn
 
-  public DocumentDetailsUI(Document document, Library library, UserUI userUI, AllDocumentsUI allDocumentsUI) {
+  public DocumentDetailsUI(Document document, Library library
+      , UserUI userUI, AllDocumentsUI allDocumentsUI) {
     this.document = document;
     this.library = library;
     this.userUI = userUI;
@@ -92,9 +93,11 @@ public class DocumentDetailsUI extends JFrame {
     // Chi tiết tài liệu
     addDetailField(panel, "ID:", String.valueOf(document.getId()), ++gbc.gridy, gbc);
     addDetailField(panel, "Tác giả:", document.getAuthor(), ++gbc.gridy, gbc);
-    addDetailField(panel, "Số lượng:", String.valueOf(document.getQuantity()), ++gbc.gridy, gbc);
+    addDetailField(panel, "Số lượng:"
+        , String.valueOf(document.getQuantity()), ++gbc.gridy, gbc);
     addDetailField(panel, "ISBN:", document.getIsbn(), ++gbc.gridy, gbc);
-    addDetailField(panel, "Năm phát hành:", String.valueOf(document.getPublicationYear()), ++gbc.gridy, gbc);
+    addDetailField(panel, "Năm phát hành:"
+        , String.valueOf(document.getPublicationYear()), ++gbc.gridy, gbc);
     addDetailField(panel, "Thể loại:", document.getGenre(), ++gbc.gridy, gbc);
 
     // Nút mượn tài liệu
@@ -155,7 +158,8 @@ public class DocumentDetailsUI extends JFrame {
     return panel;
   }
 
-  private void addDetailField(JPanel panel, String label, String value, int row, GridBagConstraints gbc) {
+  private void addDetailField(JPanel panel, String label
+      , String value, int row, GridBagConstraints gbc) {
     gbc.gridx = 0;
     gbc.gridwidth = 1;
     JLabel labelComp = new JLabel(label);
@@ -171,7 +175,8 @@ public class DocumentDetailsUI extends JFrame {
   private JScrollPane createReviewsScrollPane() {
     JScrollPane scrollPane = new JScrollPane(reviewsPanel);
     scrollPane.setBorder(BorderFactory.createCompoundBorder(
-        new TitledBorder(null, "Đánh giá và bình luận", TitledBorder.LEFT, TitledBorder.TOP, HEADER_FONT, PRIMARY_COLOR),
+        new TitledBorder(null, "Đánh giá và bình luận"
+            , TitledBorder.LEFT, TitledBorder.TOP, HEADER_FONT, PRIMARY_COLOR),
         new EmptyBorder(10, 10, 10, 10)
     ));
     scrollPane.getViewport().setBackground(CARD_COLOR);
@@ -197,7 +202,8 @@ public class DocumentDetailsUI extends JFrame {
     JLabel[] stars = new JLabel[5];
     for (int i = 0; i < stars.length; i++) {
       ImageIcon emptyStar = new ImageIcon("image/Empty Star.png");
-      Image scaledEmptyStar = emptyStar.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+      Image scaledEmptyStar = emptyStar.getImage().getScaledInstance(32, 32
+          , Image.SCALE_SMOOTH);
       stars[i] = new JLabel(new ImageIcon(scaledEmptyStar));
       stars[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -236,11 +242,13 @@ public class DocumentDetailsUI extends JFrame {
     for (int i = 0; i < stars.length; i++) {
       if (i < rating) {
         ImageIcon fullStar = new ImageIcon("image/Full Star.png");
-        Image scaledFullStar = fullStar.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+        Image scaledFullStar = fullStar.getImage().getScaledInstance(32, 32
+            , Image.SCALE_SMOOTH);
         stars[i].setIcon(new ImageIcon(scaledFullStar));
       } else {
         ImageIcon emptyStar = new ImageIcon("image/Empty Star.png");
-        Image scaledEmptyStar = emptyStar.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+        Image scaledEmptyStar = emptyStar.getImage().getScaledInstance(32, 32
+            , Image.SCALE_SMOOTH);
         stars[i].setIcon(new ImageIcon(scaledEmptyStar));
       }
     }
@@ -286,13 +294,15 @@ public class DocumentDetailsUI extends JFrame {
       averagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
       // Hiển thị số điểm trung bình
-      JLabel avgLabel = createStyledLabel(String.format("Đánh giá trung bình: %.1f/5", averageRating), HEADER_FONT);
+      JLabel avgLabel = createStyledLabel(
+          String.format("Đánh giá trung bình: %.1f/5", averageRating), HEADER_FONT);
       avgLabel.setForeground(PRIMARY_COLOR);
       averagePanel.add(avgLabel);
 
       // Thêm biểu tượng sao đầy
       ImageIcon fullStar = new ImageIcon("image/Full Star.png");
-      Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+      Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16
+          , Image.SCALE_SMOOTH);
       JLabel starLabel = new JLabel(new ImageIcon(scaledFullStar));
       averagePanel.add(starLabel);
 
@@ -322,18 +332,20 @@ public class DocumentDetailsUI extends JFrame {
     ));
 
     // Hiển thị tên người đánh giá
-    JLabel userLabel = createStyledLabel("Người đánh giá: " + review.getUsername(), CONTENT_FONT);
+    JLabel userLabel = createStyledLabel("Người đánh giá: "
+        + review.getUsername(), CONTENT_FONT);
     userLabel.setForeground(new Color(100, 100, 100));
     userLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     // Hiển thị đánh giá bằng biểu tượng sao
     JPanel starsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
     starsPanel.setBackground(new Color(245, 245, 245));
-    starsPanel.setAlignmentX(Component.LEFT_ALIGNMENT); // Đảm bảo thẳng hàng với phần còn lại
+    starsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     for (int i = 0; i < (int) review.getRating(); i++) {
       ImageIcon fullStar = new ImageIcon("image/Full Star.png");
-      Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+      Image scaledFullStar = fullStar.getImage().getScaledInstance(16, 16
+          , Image.SCALE_SMOOTH);
       JLabel starLabel = new JLabel(new ImageIcon(scaledFullStar));
       starsPanel.add(starLabel);
     }
@@ -382,12 +394,14 @@ public class DocumentDetailsUI extends JFrame {
   }
   // Lưu danh sách tài liệu vào file "documents.txt"
   private void saveLibraryToFile() {
-    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("documents.txt"))) {
+    try (ObjectOutputStream oos = new ObjectOutputStream(
+        new FileOutputStream("documents.txt"))) {
       oos.writeObject(library.getDocuments()); // Lưu danh sách tài liệu
       System.out.println("Lưu danh sách tài liệu thành công.");
     } catch (IOException e) {
       e.printStackTrace();
-      JOptionPane.showMessageDialog(this, "Lỗi khi lưu danh sách tài liệu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(this
+          , "Lỗi khi lưu danh sách tài liệu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -399,7 +413,9 @@ public class DocumentDetailsUI extends JFrame {
       System.out.println("Lưu danh sách tài liệu đã mượn thành công.");
     } catch (IOException e) {
       e.printStackTrace();
-      JOptionPane.showMessageDialog(this, "Lỗi khi lưu danh sách tài liệu đã mượn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(this
+          , "Lỗi khi lưu danh sách tài liệu đã mượn!"
+          , "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
   }
 }

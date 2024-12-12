@@ -268,7 +268,9 @@ public class UserUI extends JFrame {
         String newPhoneNumber = phoneNumberField.getText();
         String newBirthDate = birthDateField.getText();
 
-        if (newDisplayName.trim().isEmpty() || newPhoneNumber.trim().isEmpty() || newBirthDate.trim().isEmpty()) {
+        if (newDisplayName.trim().isEmpty()
+            || newPhoneNumber.trim().isEmpty()
+            || newBirthDate.trim().isEmpty()) {
           showErrorMessage("Vui lòng điền đầy đủ thông tin!");
           return;
         }
@@ -307,7 +309,7 @@ public class UserUI extends JFrame {
           JOptionPane.PLAIN_MESSAGE
       );
 
-      if (keyword == null || keyword.trim().isEmpty()) return; // Hủy nếu nhấn Cancel hoặc không nhập gì
+      if (keyword == null || keyword.trim().isEmpty()) return; // Hủy nếu nhấn Cancel
 
       // Tìm kiếm tài liệu theo ID, ISBN hoặc Tên
       Document foundDocument = null;
@@ -556,7 +558,8 @@ public class UserUI extends JFrame {
 
 
   private void saveBorrowedDocumentsToFile() {
-    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(user.getUsername() + "_borrowed.txt"))) {
+    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(
+        user.getUsername() + "_borrowed.txt"))) {
       oos.writeObject(user.getBorrowedDocuments());
     } catch (IOException e) {
       e.printStackTrace();
@@ -578,7 +581,8 @@ public class UserUI extends JFrame {
   }
 
   private void saveLibraryToFile() {
-    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("documents.txt"))) {
+    try (ObjectOutputStream oos = new ObjectOutputStream(
+        new FileOutputStream("documents.txt"))) {
       oos.writeObject(library.getDocuments()); // Lưu toàn bộ danh sách tài liệu
     } catch (IOException e) {
       e.printStackTrace();

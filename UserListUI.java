@@ -28,7 +28,8 @@ public class UserListUI extends JFrame {
     add(headerLabel, BorderLayout.NORTH);
 
     // Tạo model cho bảng với các cột
-    DefaultTableModel model = new DefaultTableModel(new Object[]{"Tên hiển thị", "Ngày sinh", "Số điện thoại"}, 0);
+    DefaultTableModel model = new DefaultTableModel(new Object[]{"Tên hiển thị"
+        , "Ngày sinh", "Số điện thoại"}, 0);
     userTable = new JTable(model);
 
     // Tùy chỉnh header của bảng
@@ -48,9 +49,10 @@ public class UserListUI extends JFrame {
     // Màu nền xen kẽ cho các hàng
     userTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
       @Override
-      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-          boolean hasFocus, int row, int column) {
-        Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+      public Component getTableCellRendererComponent(JTable table, Object value
+          , boolean isSelected, boolean hasFocus, int row, int column) {
+        Component c = super.getTableCellRendererComponent(table, value
+            , isSelected, hasFocus, row, column);
         if (!isSelected) {
           c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(0xE3F2FD));
         }
@@ -86,7 +88,9 @@ public class UserListUI extends JFrame {
     library.loadUsersFromFile();
     model.setRowCount(0); // Đảm bảo bảng trống trước khi thêm dữ liệu
     for (User user : library.getUsers()) {
-      model.addRow(new Object[]{user.getDisplayName(), user.getBirthDate(), user.getPhoneNumber()});
+      model.addRow(new Object[]{user.getDisplayName()
+          , user.getBirthDate()
+          , user.getPhoneNumber()});
     }
   }
 }

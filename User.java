@@ -18,8 +18,8 @@ public class User implements Serializable {
    * @param birthDate   the birth date of the user
    * @param phoneNumber the phone number of the user
    */
-  public User(final String username, final String password, final String displayName,
-      final String birthDate, final String phoneNumber) {
+  public User(final String username, final String password, final String displayName
+      , final String birthDate, final String phoneNumber) {
     this.username = username;
     this.password = password;
     this.displayName = displayName;

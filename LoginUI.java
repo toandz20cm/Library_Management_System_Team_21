@@ -38,7 +38,8 @@ class RoundedButton extends JButton {
 
     // Draw slight shadow
     g2.setColor(new Color(0, 0, 0, 50));
-    g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 15, 15);
+    g2.drawRoundRect(0, 0, getWidth()-1
+                    , getHeight()-1, 15, 15);
 
     super.paintComponent(g);
     g2.dispose();
@@ -71,7 +72,8 @@ public class LoginUI extends JFrame {
 
     // Logo
     ImageIcon originalIcon = new ImageIcon("image/1.jpg");
-    Image scaledImage = originalIcon.getImage().getScaledInstance(400, 160, Image.SCALE_SMOOTH);
+    Image scaledImage = originalIcon.getImage().getScaledInstance(400, 160
+                                                                  , Image.SCALE_SMOOTH);
     JLabel logoLabel = new JLabel(new ImageIcon(scaledImage));
     logoLabel.setHorizontalAlignment(JLabel.CENTER);
     headerPanel.add(logoLabel, BorderLayout.NORTH);
@@ -141,7 +143,8 @@ public class LoginUI extends JFrame {
             new UserUI(library, user).setVisible(true);
             dispose();
           } else {
-            JOptionPane.showMessageDialog(LoginUI.this, "Sai tên đăng nhập hoặc mật khẩu!");
+            JOptionPane.showMessageDialog(LoginUI.this
+                , "Sai tên đăng nhập hoặc mật khẩu!");
           }
         }
       }
@@ -217,7 +220,8 @@ public class LoginUI extends JFrame {
           new AdminUI(library).setVisible(true);
           dispose();
         } else {
-          JOptionPane.showMessageDialog(LoginUI.this, "Sai thông tin quản trị viên!");
+          JOptionPane.showMessageDialog(LoginUI.this
+              , "Sai thông tin quản trị viên!");
         }
       }
     });
@@ -228,7 +232,8 @@ public class LoginUI extends JFrame {
     field.setForeground(new Color(120, 120, 120));
     field.setBackground(Color.WHITE);
     field.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+        BorderFactory.createLineBorder(new Color(200, 200, 200)
+            , 1, true),
         BorderFactory.createEmptyBorder(10, 15, 10, 15)
     ));
     field.setText(placeholder);
@@ -242,7 +247,8 @@ public class LoginUI extends JFrame {
         }
         field.setForeground(new Color(50, 50, 50));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(79, 121, 255), 2, true),
+            BorderFactory.createLineBorder(new Color(79, 121, 255)
+                , 2, true),
             BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
       }
@@ -253,7 +259,8 @@ public class LoginUI extends JFrame {
           field.setText(placeholder);
           field.setForeground(new Color(120, 120, 120));
           field.setBorder(BorderFactory.createCompoundBorder(
-              BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+              BorderFactory.createLineBorder(new Color(200, 200, 200)
+                  , 1, true),
               BorderFactory.createEmptyBorder(10, 15, 10, 15)
           ));
         }
@@ -268,7 +275,8 @@ public class LoginUI extends JFrame {
     field.setForeground(new Color(120, 120, 120));
     field.setBackground(Color.WHITE);
     field.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+        BorderFactory.createLineBorder(new Color(200, 200, 200)
+            , 1, true),
         BorderFactory.createEmptyBorder(10, 15, 10, 15)
     ));
     field.setEchoChar((char) 0);
@@ -284,7 +292,8 @@ public class LoginUI extends JFrame {
         }
         field.setForeground(new Color(50, 50, 50));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(79, 121, 255), 2, true),
+            BorderFactory.createLineBorder(new Color(79, 121, 255)
+                , 2, true),
             BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
       }
@@ -296,7 +305,8 @@ public class LoginUI extends JFrame {
           field.setEchoChar((char) 0);
           field.setForeground(new Color(120, 120, 120));
           field.setBorder(BorderFactory.createCompoundBorder(
-              BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+              BorderFactory.createLineBorder(new Color(200, 200, 200)
+                  , 1, true),
               BorderFactory.createEmptyBorder(10, 15, 10, 15)
           ));
         }
@@ -341,7 +351,8 @@ public class LoginUI extends JFrame {
 
   private boolean validateCredentials(String username, String password) {
     if (username.length() < 6 || password.length() < 6) {
-      JOptionPane.showMessageDialog(this, "Tên đăng nhập và mật khẩu phải có ít nhất 6 ký tự!");
+      JOptionPane.showMessageDialog(this
+          , "Tên đăng nhập và mật khẩu phải có ít nhất 6 ký tự!");
       return false;
     }
     return true;

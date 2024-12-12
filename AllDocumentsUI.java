@@ -120,7 +120,9 @@ public class AllDocumentsUI extends JFrame {
   private void setupDetailButton() {
     TableColumn detailColumn = documentsTable.getColumn("");
     detailColumn.setCellRenderer(new ButtonRenderer());
-    detailColumn.setCellEditor(new ButtonEditor(new JCheckBox(), library, this)); // Truyền this làm parent
+    detailColumn.setCellEditor(new ButtonEditor(new JCheckBox()
+                                , library
+                                , this)); // Truyền this làm parent
   }
 
   private void addReloadButton() {

@@ -76,7 +76,8 @@ public class Library {
     }
   }
 
-  public void editDocument(int id, String title, String author, int quantity, String isbn, int publicationYear, String genre) {
+  public void editDocument(int id, String title, String author, int quantity
+                          , String isbn, int publicationYear, String genre) {
     for (Document doc : documents) {
       if (doc.getId() == id) {
         doc.setTitle(title); // Cập nhật Title
@@ -103,7 +104,7 @@ public class Library {
 
   public List<Document> searchDocuments(String keyword) {
     List<Document> matchingDocuments = new ArrayList<>();
-    keyword = keyword.toLowerCase();  // Chuyển về chữ thường để tìm kiếm không phân biệt hoa/thường
+    keyword = keyword.toLowerCase();// Chuyển về chữ thường để tìm kiếm không phân biệt hoa/thường
     for (Document doc : documents) {
       if (doc.getTitle().toLowerCase().contains(keyword) ||
           doc.getAuthor().toLowerCase().contains(keyword) ||
@@ -173,7 +174,7 @@ public class Library {
       try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
         String line;
         while ((line = reader.readLine()) != null) {
-          String[] parts = line.split(";", 3);  // Giả sử lưu theo định dạng username;rating;comment
+          String[] parts = line.split(";", 3);
           if (parts.length == 3) {
             reviews.add(new Review(parts[0], Double.parseDouble(parts[1]), parts[2]));
           }
@@ -189,7 +190,9 @@ public class Library {
   public void addReview(int documentId, Review review) {
     File file = new File(documentId + "_reviews.txt");
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-      writer.write(review.getUsername() + ";" + review.getRating() + ";" + review.getComment());
+      writer.write(review.getUsername() + ";"
+                    + review.getRating() + ";"
+                    + review.getComment());
       writer.newLine();
     } catch (IOException e) {
       e.printStackTrace();

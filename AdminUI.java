@@ -68,7 +68,8 @@ public class AdminUI extends JFrame {
       protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        GradientPaint gradient = new GradientPaint(0, 0, primaryColor, getWidth(), 0, secondaryColor);
+        GradientPaint gradient = new GradientPaint(0, 0
+            , primaryColor, getWidth(), 0, secondaryColor);
         g2d.setPaint(gradient);
         g2d.fillRect(0, 0, getWidth(), getHeight());
       }
@@ -391,7 +392,8 @@ public class AdminUI extends JFrame {
     });
 
     // Other existing action listeners
-    viewAllDocumentsButton.addActionListener(e -> new AllDocumentsUI(library,null).setVisible(true));
+    viewAllDocumentsButton.addActionListener(e
+        -> new AllDocumentsUI(library,null).setVisible(true));
 
     addDocumentByGoogleBooksAPIButton.addActionListener(e -> {
       // Panel chính chứa các tùy chọn
@@ -403,7 +405,7 @@ public class AdminUI extends JFrame {
       searchPanel.setLayout(new GridBagLayout());
       searchPanel.setBackground(Color.WHITE);
       GridBagConstraints gbc = new GridBagConstraints();
-      gbc.insets = new Insets(5, 10, 5, 10); // Khoảng cách giữa các thành phần
+      gbc.insets = new Insets(5, 10, 5, 10);
 
       // Ô nhập từ khóa
       JTextField keywordField = new JTextField(20);
@@ -415,7 +417,8 @@ public class AdminUI extends JFrame {
       searchPanel.add(keywordField, gbc);
 
       // ComboBox chọn kiểu tìm kiếm
-      JComboBox<String> searchTypeComboBox = new JComboBox<>(new String[]{"Title", "ISBN", "Genre", "Author", "Year"});
+      JComboBox<String> searchTypeComboBox = new JComboBox<>(new String[]{"Title"
+          , "ISBN", "Genre", "Author", "Year"});
       gbc.gridx = 0;
       gbc.gridy = 1;
       gbc.gridwidth = 1;
@@ -500,7 +503,8 @@ public class AdminUI extends JFrame {
 
       // Thêm renderer và editor cho cột "Add"
       table.getColumn("").setCellRenderer(new ButtonRenderer());
-      table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), library, tableModel));
+      table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox()
+          , library, tableModel));
 
       // Thêm các panel vào mainPanel
       mainPanel.add(searchPanel, BorderLayout.NORTH);
@@ -525,7 +529,8 @@ public class AdminUI extends JFrame {
           // Thực hiện tìm kiếm
           new FetchBooksTask(keyword, searchType, tableModel, searchButton, progressBar).execute();
         } else {
-          JOptionPane.showMessageDialog(frame, "Please enter a keyword.", "Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(frame, "Please enter a keyword."
+              , "Error", JOptionPane.ERROR_MESSAGE);
         }
       });
     });
@@ -718,7 +723,8 @@ public class AdminUI extends JFrame {
     private final JButton searchButton; // Tham chiếu nút "Search"
     private final JProgressBar progressBar; // Tham chiếu đến JProgressBar
 
-    public FetchBooksTask(String keyword, String searchType, DefaultTableModel tableModel, JButton searchButton, JProgressBar progressBar) {
+    public FetchBooksTask(String keyword, String searchType, DefaultTableModel tableModel
+        , JButton searchButton, JProgressBar progressBar) {
       this.keyword = keyword;
       this.searchType = searchType;
       this.tableModel = tableModel;
@@ -778,7 +784,8 @@ public class AdminUI extends JFrame {
               ? volumeInfo.getJSONArray("categories").getString(0)
               : "Unknown";
           String isbn = volumeInfo.optJSONArray("industryIdentifiers") != null
-              ? volumeInfo.getJSONArray("industryIdentifiers").getJSONObject(0).getString("identifier")
+              ? volumeInfo.getJSONArray("industryIdentifiers")
+              .getJSONObject(0).getString("identifier")
               : "Unknown";
 
           // Lọc kết quả chính xác theo searchType
@@ -893,7 +900,8 @@ public class AdminUI extends JFrame {
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value
+        , boolean isSelected, boolean hasFocus, int row, int column) {
       setText(value == null ? "Add" : value.toString());
       return this;
     }
@@ -909,7 +917,8 @@ public class AdminUI extends JFrame {
     private DefaultTableModel tableModel;
     private Library library;
 
-    public ButtonEditor(JCheckBox checkBox, Library library, DefaultTableModel tableModel) {
+    public ButtonEditor(JCheckBox checkBox, Library library
+        , DefaultTableModel tableModel) {
       super(checkBox);
       this.library = library;
       this.tableModel = tableModel;
@@ -933,7 +942,7 @@ public class AdminUI extends JFrame {
       button.addActionListener(e -> {
         button.setBackground(new Color(31, 97, 141)); // Màu nền khi bấm
         fireEditingStopped(); // Dừng chỉnh sửa
-        SwingUtilities.invokeLater(() -> button.setBackground(new Color(41, 128, 185))); // Trả lại màu mặc định
+        SwingUtilities.invokeLater(() -> button.setBackground(new Color(41, 128, 185)));
       });
     }
 
@@ -960,7 +969,9 @@ public class AdminUI extends JFrame {
 
           // Kiểm tra dữ liệu null hoặc rỗng
           if (title == null || title.isEmpty() || isbn == null || isbn.isEmpty()) {
-            JOptionPane.showMessageDialog(button, "Invalid data. Please check the input.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(button
+                , "Invalid data. Please check the input."
+                , "Error", JOptionPane.ERROR_MESSAGE);
             return label;
           }
 
@@ -973,7 +984,9 @@ public class AdminUI extends JFrame {
           if (duplicateDoc != null) {
             // Nếu tài liệu đã tồn tại, tăng số lượng
             duplicateDoc.setQuantity(duplicateDoc.getQuantity() + 1);
-            JOptionPane.showMessageDialog(button, "This document already exists. Quantity has been updated.", "Document Updated", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(button
+                , "This document already exists. Quantity has been updated."
+                , "Document Updated", JOptionPane.INFORMATION_MESSAGE);
           } else {
             // Thêm tài liệu mới vào thư viện
             Document doc = new Document(
@@ -987,11 +1000,15 @@ public class AdminUI extends JFrame {
             );
 
             library.addDocument(doc);
-            JOptionPane.showMessageDialog(button, "Document added successfully: " + title, "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(button
+                , "Document added successfully: " + title
+                , "Success", JOptionPane.INFORMATION_MESSAGE);
           }
 
         } catch (Exception e) {
-          JOptionPane.showMessageDialog(button, "An error occurred while adding the document.", "Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(button
+              , "An error occurred while adding the document."
+              , "Error", JOptionPane.ERROR_MESSAGE);
           e.printStackTrace();
         }
       }
@@ -1025,7 +1042,8 @@ public class AdminUI extends JFrame {
         return jsonBuilder.toString();
       } else {
         // Nếu có lỗi HTTP, đọc phản hồi lỗi
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+        BufferedReader errorReader = new BufferedReader(
+            new InputStreamReader(conn.getErrorStream()));
         StringBuilder errorBuilder = new StringBuilder();
         String line;
         while ((line = errorReader.readLine()) != null) {
@@ -1038,7 +1056,9 @@ public class AdminUI extends JFrame {
       }
     } catch (IOException e) {
       // Hiển thị thông báo nếu mất kết nối
-      JOptionPane.showMessageDialog(null, "Failed to connect to the server. Please check your internet connection.", "Network Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(null
+          , "Failed to connect to the server. Please check your internet connection."
+          , "Network Error", JOptionPane.ERROR_MESSAGE);
       throw e; // Ném lại ngoại lệ để xử lý tiếp
     }
   }
