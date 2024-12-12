@@ -160,7 +160,7 @@ public class UserUI extends JFrame {
     };
 
     String[] buttonIcons = {
-        "👤    ", "📚      ", "↩️", "🔍     ", "🚪     ","🛠️      "," "
+        "👤    ", "📚      ", "↩️", "🔍     ", "🚪     ","🛠️      ","🔄 "
     };
 
     actionButtons = new JButton[buttonTexts.length];
