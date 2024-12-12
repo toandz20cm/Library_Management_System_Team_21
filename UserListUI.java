@@ -1,8 +1,15 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.io.*;
+import java.util.List;
 
 public class UserListUI extends JFrame {
   private JTable userTable;
@@ -81,6 +88,35 @@ public class UserListUI extends JFrame {
     footerLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
     add(footerLabel, BorderLayout.SOUTH);
 
+    // Thêm footer với nút "Xem Chi Tiết"
+    JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    JButton detailButton = new JButton("Xem Chi Tiết");
+    detailButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    detailButton.setBackground(new Color(0x64B5F6));
+    detailButton.setForeground(Color.WHITE);
+
+    detailButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow != -1) {
+          String displayName = (String) userTable.getValueAt(selectedRow, 0);
+          String username = getUsernameByDisplayName(displayName); // Tìm username
+
+          if (username != null) {
+            new UserDetailUI(library, username, displayName); // Mở giao diện chi tiết
+          } else {
+            JOptionPane.showMessageDialog(UserListUI.this, "Không tìm thấy username cho người dùng này!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+          }
+        } else {
+          JOptionPane.showMessageDialog(UserListUI.this, "Vui lòng chọn một người dùng!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+        }
+      }
+    });
+
+    footerPanel.add(detailButton);
+    add(footerPanel, BorderLayout.SOUTH);
+
     setVisible(true);
   }
 
@@ -92,5 +128,20 @@ public class UserListUI extends JFrame {
           , user.getBirthDate()
           , user.getPhoneNumber()});
     }
+  }
+  private String getUsernameByDisplayName(String displayName) {
+    String filePath = "users.txt"; // File lưu danh sách người dùng
+    try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
+      // Đọc danh sách người dùng từ file
+      List<User> users = (List<User>) ois.readObject();
+      for (User user : users) {
+        if (user.getDisplayName().equals(displayName)) {
+          return user.getUsername(); // Trả về username nếu tìm thấy displayName khớp
+        }
+      }
+    } catch (IOException | ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+    return null; // Trả về null nếu không tìm thấy
   }
 }
