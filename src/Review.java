@@ -1,3 +1,5 @@
+package src;
+
 public class Review {
   private String username;
   private double rating;
