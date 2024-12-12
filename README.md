@@ -88,10 +88,9 @@ A **beautiful** and **easy-to-use** Management Tool
 <img align="right" src="/image/redm/adminUI.png" alt="Management Page" width="60%">
 
 - Tối giản với các tính năng hỗ trợ:
-  - Tìm Kiếm
-  - Lọc Thông Tin
-  - Nhập Xuất Excel
-  - Table đa dụng
+  - Tìm kiếm tài liệu trong thư viện hoặc online bằng Google API
+  - Chỉnh sửa/ thêm/ xóa tài liệu
+  - Quản lý người dùng
   - Và nhiều hơn nữa...
 
 <br clear="both">
