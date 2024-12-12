@@ -58,7 +58,7 @@ public class LoginUI extends JFrame {
     this.library = library;
 
     setTitle("Library Management System");
-    setSize(450, 650);
+    setSize(550, 750);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLocationRelativeTo(null);
     setLayout(new BorderLayout(0, 20));
@@ -71,8 +71,8 @@ public class LoginUI extends JFrame {
     headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
 
     // Logo
-    ImageIcon originalIcon = new ImageIcon("image/1.jpg");
-    Image scaledImage = originalIcon.getImage().getScaledInstance(400, 160
+    ImageIcon originalIcon = new ImageIcon("image/1.png");
+    Image scaledImage = originalIcon.getImage().getScaledInstance(500, 250
                                                                   , Image.SCALE_SMOOTH);
     JLabel logoLabel = new JLabel(new ImageIcon(scaledImage));
     logoLabel.setHorizontalAlignment(JLabel.CENTER);
