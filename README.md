@@ -25,7 +25,8 @@ A **beautiful** and **easy-to-use** Management Tool
 - [Thành Viên Nhóm](#thành-viên-nhóm)
 - [Tài Khoản](#tài-khoản)
 - [Chức Năng Chính](#chức-năng-chính)
-- [Screenshot](#screenshot)
+- [Trang người dùng](#trang-người-dùng)
+- [Trang quản lý](#trang-quản-lý)
 
 ---
 
@@ -62,7 +63,7 @@ A **beautiful** and **easy-to-use** Management Tool
 
 ### Trang Đăng Nhập
 
-<img align="right" src="/Review/Login%20GUI.png" alt="Login GUI" width="45%">
+<img align="right" src="/image/redm/loginUI.png" alt="Login GUI" width="45%">
 
 - Giao diện **hiện đại**, **tối giản**.
 - Hỗ trợ nhiều loại tài khoản (User, Admin).
@@ -73,7 +74,7 @@ A **beautiful** and **easy-to-use** Management Tool
 
 ### Trang Người Dùng
 
-<img align="left" src="/Review/capture(89).png" alt="User Page" width="45%">
+<img align="left" src="/image/redm/userUI.png" alt="User Page" width="45%">
 
 - **Trực quan** và **dễ sử dụng**.
 - Cung cấp thông tin tổng quan về hệ thống.
@@ -84,7 +85,7 @@ A **beautiful** and **easy-to-use** Management Tool
 
 ### Trang Quản Lý
 
-<img align="right" src="/Review/capture(90).png" alt="Management Page" width="45%">
+<img align="right" src="/image/redm/adminUI.png" alt="Management Page" width="45%">
 
 - Tối giản với các tính năng hỗ trợ:
   - Tìm Kiếm
