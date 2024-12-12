@@ -10,6 +10,15 @@ public class UserDetailUI extends JFrame {
     private String username;
     private String displayName;
 
+    // Biểu tượng nút
+    private static final String[] buttonIcons = {
+        ">  ",    // Tên tài khoản
+        ">  ",    // Mật khẩu
+        ">   ",   // Tên hiển thị
+        ">  ",    // Ngày sinh
+        ">  "     // Số điện thoại
+    };
+
     public UserDetailUI(Library library, String username, String displayName) {
         this.username = username;
         this.displayName = displayName;
@@ -84,11 +93,11 @@ public class UserDetailUI extends JFrame {
             List<User> users = (List<User>) ois.readObject();
             for (User user : users) {
                 if (user.getUsername().equals(username)) {
-                    userDetails.append("👤 Tên tài khoản: ").append(user.getUsername()).append("\n");
-                    userDetails.append("🔒 Mật khẩu: ").append(user.getPassword()).append("\n");
-                    userDetails.append("🏷️ Tên hiển thị: ").append(user.getDisplayName()).append("\n");
-                    userDetails.append("📅 Ngày sinh: ").append(user.getBirthDate()).append("\n");
-                    userDetails.append("📞 Số điện thoại: ").append(user.getPhoneNumber()).append("\n\n");
+                    userDetails.append(buttonIcons[0]).append("Tên tài khoản: ").append(user.getUsername()).append("\n");
+                    userDetails.append(buttonIcons[1]).append("Mật khẩu: ").append(user.getPassword()).append("\n");
+                    userDetails.append(buttonIcons[2]).append("Tên hiển thị: ").append(user.getDisplayName()).append("\n");
+                    userDetails.append(buttonIcons[3]).append("Ngày sinh: ").append(user.getBirthDate()).append("\n");
+                    userDetails.append(buttonIcons[4]).append("Số điện thoại: ").append(user.getPhoneNumber()).append("\n\n");
                     break;
                 }
             }
