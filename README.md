@@ -25,6 +25,7 @@ A **beautiful** and **easy-to-use** Management Tool
 - [Thành Viên Nhóm](#thành-viên-nhóm)
 - [Tài Khoản](#tài-khoản)
 - [Chức Năng Chính](#chức-năng-chính)
+- [Trang đăng nhập](#trang-đăng-nhập)
 - [Trang người dùng](#trang-người-dùng)
 - [Trang quản lý](#trang-quản-lý)
 
@@ -48,8 +49,8 @@ A **beautiful** and **easy-to-use** Management Tool
 |-----|-------------------|------------|
 | 1   | toan27            | toan27     |
 | 2   | duong1            | 123456     |
-| 3   | QL000002          | QL000002   |
-| 4   | QL000003          | QL000003   |
+| 3   | vanhhh            | vanhhh     |
+| 4   | QL000001          | QL000001   |
 
 ### Admin
 
@@ -61,7 +62,7 @@ A **beautiful** and **easy-to-use** Management Tool
 
 ## 🛠️ Chức Năng Chính
 
-### Trang Đăng Nhập
+### 🔑 Trang Đăng Nhập
 
 <img align="right" src="/image/redm/loginUI.png" alt="Login GUI" width="60%">
 
@@ -72,7 +73,7 @@ A **beautiful** and **easy-to-use** Management Tool
 
 ---
 
-### Trang Người Dùng
+### 👤 Trang Người Dùng
 
 <img align="right" src="/image/redm/userUI.png" alt="User Page" width="60%">
 
@@ -83,7 +84,7 @@ A **beautiful** and **easy-to-use** Management Tool
 
 ---
 
-### Trang Quản Lý
+### 📊 Trang Quản Lý
 
 <img align="right" src="/image/redm/adminUI.png" alt="Management Page" width="60%">
 
