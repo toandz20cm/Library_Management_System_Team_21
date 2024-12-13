@@ -40,6 +40,11 @@ A **beautiful** and **easy-to-use** Management Tool
 | 3   | Trần Đức Việt Anh| 22022190   |
 
 ---
+## 📚 UML
+
+<img src="/image/redm/classnew.drawio.png" alt="Library Management" width="100%">
+
+---
 
 ## 🔑 Tài Khoản
 
